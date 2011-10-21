@@ -72,6 +72,7 @@ several use cases that the client supports:
    is parsed to rows and encrypted first. Then the server's __insert()__ function
    is called.
    Required input:
+   * bla
 
 
 2) Querying
