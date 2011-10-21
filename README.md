@@ -68,13 +68,17 @@ Client (C)
 The client consists of a PHP front-end that calls the server API. There are
 several use cases that the client supports:
 
-1) Insert/overwrite a tree corresponding to a treeID on the server. The tree 
+1. Insert/overwrite a tree corresponding to a treeID on the server. The tree 
    is parsed to rows and encrypted first. Then the server's __insert()__ function
    is called.
-   Required input:
-   * bla
+
+Required input:
+
+* The treeID
+* The XML file that should be stored
+* Secret key information.
 
 
-2) Querying
+2. Querying
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
