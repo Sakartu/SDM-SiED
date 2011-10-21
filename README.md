@@ -100,8 +100,8 @@ Required input:
 
 Output:
 
-* If the query is succesful, the decrypted tree(s) that represent the result of the query
-  are displayed.
+* If the query is succesful, the decrypted row(s) that represent the result of the query
+  are displayed. Ideally, a tree representation is given.
 * If an error occurs (Invalid XPath, Invalid treeID) then this should be displayed.
 
 
