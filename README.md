@@ -68,7 +68,7 @@ Client (C)
 The client consists of a PHP front-end that calls the server API. There are
 several use cases that the client supports:
 
-1. __Insert/overwrite__ a tree corresponding to a treeID on the server. The client 
+1) __Insert/overwrite__ a tree corresponding to a treeID on the server. The client 
    will parse the XML file to the required row format, then encrypt it. The server's
    __insert()__ function is called with this input.
 
@@ -82,7 +82,10 @@ Output:
 
 * If the operation succeeded: yes or no.
 
-2. __Querying__ using an XPath query. The client will encrypt the XPath query, then send 
+
+
+
+2) __Querying__ using an XPath query. The client will encrypt the XPath query, then send 
    it off to the server. The trees returned by the server are decrypted, and the results 
    are displayed.
 
@@ -98,7 +101,10 @@ Output:
   are displayed.
 * If an error occurs (Invalid XPath, Invalid treeID) then this should be displayed.
 
-3. __Updating__ a token in a tree on the server. The combination of treeID and pre value uniquely 
+
+
+
+3) __Updating__ a token in a tree on the server. The combination of treeID and pre value uniquely 
   identifies the node that should have its token changed. The client will encrypt the token before 
   sending it off to the server.
 
@@ -112,5 +118,8 @@ Required input:
 Output: 
 
 * If the query was succesful (yes/no). If an error occured, the reason should be displayed.
+
+
+
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
