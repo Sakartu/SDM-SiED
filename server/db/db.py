@@ -1,0 +1,2 @@
+def initialize(conf):
+    pass
