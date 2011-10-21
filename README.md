@@ -40,7 +40,7 @@ insert into the database. These rows will look like:
 
 Following [1] inserting data in the database isn't as easy as it looks. Each
 time new data is inserted all rows that have a higher pre value have to be
-reëncrypted because all their pre values change and the encryption of the data
+re-encrypted because all their pre values change and the encryption of the data
 in a row is dependant on the pre value. If we would've used one big tree for all
 the clients this would've meant that on each insert the data of all clients
 would need to be reëncrypted, which isn't possible since a client doesn't have
