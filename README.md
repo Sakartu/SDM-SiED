@@ -30,11 +30,12 @@ Server (S)
 S is basically a wrapper around a database. We will use sqlite3 for portability.
 The wrapper will provide the following functions on top of the database:
 
-__insert(treeID, XMLData[])__
+__insert(treeID, EncryptedRows[])__
 
-The insert function is used to insert data into the database. The treeID
-parameter indentifies the tree. The XMLData[] provided is a list of rows to
-insert into the database. These rows will look like: 
+The insert function  is used to insert data into the database. Any existing rows 
+with the same treeID are first deleted. The treeID parameter indentifies the tree.  
+The XMLData[] provided is a list of rows to insert into the database. 
+These rows will look like: 
 
 > \<treeID, pre, post, parent, Cval\>
 
@@ -63,5 +64,16 @@ subtrees is returned, each of which has a rootnode matching the XPath query.
 
 Client (C)
 ----------
+
+The client consists of a PHP front-end that calls the server API. There are
+several use cases that the client supports:
+
+1) Insert/overwrite a tree corresponding to a treeID on the server. The tree 
+   is parsed to rows and encrypted first. Then the server's __insert()__ function
+   is called.
+   Required input:
+
+
+2) Querying
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
