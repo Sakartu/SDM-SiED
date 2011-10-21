@@ -13,9 +13,9 @@ follows:
 We will use a modified version of the encryption scheme described in the paper
 [1]. Our modifications have to do with the requisite that clients may only
 access their own data, not the data of other clients. To this end we'll give
-each client a unique token with which it can access only it's own part of the
-database. The consultant has the tokens of all of his clients, so he can access
-and change any data that he wants.
+each client a unique tree identifier with which it can access only it's own part 
+of the database. The consultant has the identifier of all of his clients, so he can 
+access and change any data that he wants.
 
 Setup
 =====
@@ -30,31 +30,31 @@ Server (S)
 S is basically a wrapper around a database. We will use sqlite3 for portability.
 The wrapper will provide the following functions on top of the database:
 
-__insert(tokens[], XMLData[])__
+__insert(treeID, XMLData[])__
 
-The insert function is used to insert data into the database. The tokens[]
-parameter is a list of byte[]'s. The XMLData[] provided is a list of rows to
+The insert function is used to insert data into the database. The treeID
+parameter indentifies the tree. The XMLData[] provided is a list of rows to
 insert into the database. These rows will look like: 
 
-> \<token, pre, post, parent, Cval\>
+> \<treeID, pre, post, parent, Cval\>
 
 Following [1] inserting data in the database isn't as easy as it looks. Each
 time new data is inserted all rows that have a higher pre value have to be
 re-encrypted because all their pre values change and the encryption of the data
 in a row is dependant on the pre value. If we would've used one big tree for all
 the clients this would've meant that on each insert the data of all clients
-would need to be reëncrypted, which isn't possible since a client doesn't have
-another client's token. This is why each of the shards belonging to one client
-token contain only one tree, meaning that pre, post and parent values are
+would need to be re-encrypted, which isn't possible since a client doesn't have
+another client's treeID. This is why each of the shards belonging to one treeID
+contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
-__update(tokens[], int pre, byte[] value)__
+__update(treeID, int pre, byte[] value)__
 
-Updating a row in the database is rather easy. Each row is uniquely identified
-by its pre value. So, if a client has the correct token, she can update the
-value belonging to the row with the defined pre value.
+Updating a row in the database is rather easy. Each node in a tree is uniquely 
+identified by its pre value. So, if a client supplies both treeID and pre then
+the node is uniquely identified.
 
-__search(tokens[], byte[] XPathEncrypted)__
+__search(treeID[], byte[] XPathEncrypted)__
 
 Searching in the database is where the real magic happens. This method can
 evaluate a limited set of XPath queries in a very fast manner, using the pre,
