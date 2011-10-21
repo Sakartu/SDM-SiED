@@ -55,12 +55,12 @@ Updating a row in the database is rather easy. Each node in a tree is uniquely
 identified by its pre value. So, if a client supplies both treeID and pre then
 the node is uniquely identified.
 
-__search(treeID[], byte[] XPathEncrypted)__
+__search(treeID, byte[] XPathEncrypted)__
 
 Searching in the database is where the real magic happens. This method can
-evaluate a limited set of XPath queries in a very fast manner, using the pre,
-post and parent values stored in each row. As a result to the query a set of
-subtrees is returned, each of which has a rootnode matching the XPath query.
+evaluate an XPath query in a very fast manner, using the pre, post and parent 
+values stored in each row. As a result to the query a set of result trees is 
+returned, each of which has a rootnode matching the XPath query.
 
 Client (C)
 ----------
@@ -68,17 +68,49 @@ Client (C)
 The client consists of a PHP front-end that calls the server API. There are
 several use cases that the client supports:
 
-1. Insert/overwrite a tree corresponding to a treeID on the server. The tree 
-   is parsed to rows and encrypted first. Then the server's __insert()__ function
-   is called.
+1. __Insert/overwrite__ a tree corresponding to a treeID on the server. The client 
+   will parse the XML file to the required row format, then encrypt it. The server's
+   __insert()__ function is called with this input.
 
 Required input:
 
 * The treeID
-* The XML file that should be stored
+* The XML file that should be stored. Note that any node can contain either text or child nodes, __not both__.
 * Secret key information.
 
+Output: 
 
-2. Querying
+* If the operation succeeded: yes or no.
+
+2. __Querying__ using an XPath query. The client will encrypt the XPath query, then send 
+   it off to the server. The trees returned by the server are decrypted, and the results 
+   are displayed.
+
+Required input: 
+
+* The treeID
+* The XPath query
+* Secret key information
+
+Output:
+
+* If the query is succesful, the decrypted tree(s) that represent the result of the query
+  are displayed.
+* If an error occurs (Invalid XPath, Invalid treeID) then this should be displayed.
+
+3. __Updating__ a token in a tree on the server. The combination of treeID and pre value uniquely 
+  identifies the node that should have its token changed. The client will encrypt the token before 
+  sending it off to the server.
+
+Required input:
+
+* The treeID
+* The pre value
+* The new token
+* Secret key information
+
+Output: 
+
+* If the query was succesful (yes/no). If an error occured, the reason should be displayed.
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
