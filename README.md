@@ -71,7 +71,7 @@ several use cases that the client supports:
 
 1) Insert/Overwrite
 ----------
-1) __Insert/overwrite__ a tree corresponding to a treeID on the server. The client 
+   __Insert/overwrite__ a tree corresponding to a treeID on the server. The client 
    will parse the XML file to the required row format, then encrypt it. The server's
    __insert()__ function is called with this input.
 
@@ -88,7 +88,7 @@ Output:
 
 2) Querying
 ------------
-2) __Querying__ using an XPath query. The client will encrypt the XPath query, then send 
+   __Querying__ using an XPath query. The client will encrypt the XPath query, then send 
    it off to the server. The trees returned by the server are decrypted, and the results 
    are displayed.
 
@@ -107,7 +107,7 @@ Output:
 
 3) Updating
 ----------
-3) __Updating__ a token in a tree on the server. The combination of treeID and pre value uniquely 
+  __Updating__ a token in a tree on the server. The combination of treeID and pre value uniquely 
   identifies the node that should have its token changed. The client will encrypt the token before 
   sending it off to the server.
 
