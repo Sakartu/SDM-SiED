@@ -55,7 +55,7 @@ Updating a row in the database is rather easy. Each node in a tree is uniquely
 identified by its pre value. So, if a client supplies both treeID and pre then
 the node is uniquely identified.
 
-__search(treeID, byte[] XPathEncrypted)__
+__search(base64 treeID, string query, base64[] XPathEncrypted)__
 
 Searching in the database is where the real magic happens. This method can
 evaluate an XPath query in a very fast manner, using the pre, post and parent 
