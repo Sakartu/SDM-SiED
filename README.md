@@ -12,12 +12,14 @@ follows:
 
 We will use a modified version of the encryption scheme described in the paper
 [1]. Our modifications have to do with the requisite that clients may only
-access their own data, not the data of other clients. To this end we'll give
-each client a unique tree identifier with which it can access only it's own part 
-of the database. The consultant has the identifier of all of his clients, so he can 
-access and change any data that he wants.
+access their own data, not the data of other clients. To authorize a command,
+the client will sign it using it's private key. The server has a list of public
+keys with which it can verify the command and execute it. Each user has it's own
+"tree" stored in the database which is identified by a treeID. The pre, post and
+parent values are restarted for each tree, in this way the recalculations needed
+at insertion (see [1]) will only affect the tree of a single user.
 
-Setup
+Setup 
 =====
 
 Our implementation consists of a client and a server part, which we will call C
@@ -32,10 +34,10 @@ The wrapper will provide the following functions on top of the database:
 
 __add_pubkey(base64 sig, base64 pubkey)__
 
-THis add pubkey function is used by the consultant to add new client keys. The
+The add pubkey function is used by the consultant to add new client keys. The
 sig is created using the private key of the consultant and the query will be
 executed only if the sig matches a check against the public key of the
-consultant.
+consultant. This public key is built into the system.
 
 __insert(base64 sig, base64 treeID, string EncryptedRows[])__
 
@@ -56,8 +58,8 @@ re-encrypted because all their pre values change and the encryption of the data
 in a row is dependant on the pre value. If we would've used one big tree for all
 the clients this would've meant that on each insert the data of all clients
 would need to be re-encrypted, which isn't possible since a client doesn't have
-another client's treeID. This is why each of the shards belonging to one treeID
-contain only one tree, meaning that pre, post and parent values are
+another client's encryption key. This is why each of the shards belonging to one
+treeID contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
 __update(base64 sig, base64 treeID, int pre, base64 value)__
@@ -66,13 +68,15 @@ Updating a row in the database is rather easy. Each node in a tree is uniquely
 identified by its pre value. So, if a client supplies both treeID and pre then
 the node is uniquely identified. The sig, again, is used to validate this query.
 
-__search(base64 sig, base64 treeID, string query, base64[] XPathEncrypted)__
+__search(base64 sig, base64 treeID, string query, base64[] encrypted_content)__
 
 Searching in the database is where the real magic happens. This method can
-evaluate an XPath query in a very fast manner, using the pre, post and parent 
-values stored in each row. As a result to the query a set of result trees is
-returned, each of which has a rootnode matching the XPath query. The sig, again,
-is used to validate this query.
+evaluate an XPath query in a very fast manner, using the pre, post and parent
+values stored in each row. The result to the query is a result tree which
+contains a rootnode matching the XPath query. The query itself contains numbers,
+each of which denoting a spot in the encrypted_content list. For instance, in
+the query '/1/2//3[@4="5"]' we substitute each of the numbers x with the content
+on spot encrypted_content[x]. The sig, again, is used to validate this query.
 
 Client (C)
 ----------
