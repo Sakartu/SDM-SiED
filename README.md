@@ -39,7 +39,7 @@ sig is created using the private key of the consultant and the query will be
 executed only if the sig matches a check against the public key of the
 consultant. This public key is built into the system.
 
-__insert(base64 sig, base64 treeID, string EncryptedRows[])__
+__insert(base64 sig, base64 treeID, string[] EncryptedRows)__
 
 The insert function is used to insert data into the database. Any existing rows
 with the same treeID are first deleted. The treeID parameter indentifies the
