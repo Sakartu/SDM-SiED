@@ -1,5 +1,6 @@
 import hashlib
 import util.util as util
+import util.constants as constants
 
 class SiEDRPCHandler:
     def __init__(self, conf):
@@ -17,15 +18,20 @@ class SiEDRPCHandler:
         key = hashlib.sha512('jemoeder').digest()
         print repr(util.decrypt(key, ctext))
 
-    #__insert(treeID, EncryptedRows[])__
-    def insert(tree_id, encrypted_rows):
+    # __add_pubkey(base64 sig, base64 pubkey)__
+    def add_pubkey(sig, pubkey):
+        #first we check the validity of the query using sig
         pass
 
-    #__update(treeID, int pre, byte[] value)__
-    def update(tree_id, pre, value):
+    # __insert(base64 sig, base64 treeID, string[] EncryptedRows)__
+    def insert(sig, treeID, encrypted_rows):
         pass
 
-    #__search(treeID, XPathEncrypted)__
-    def search(tree_id, encrypted_xpath):
+    # __update(base64 sig, base64 treeID, int pre, base64 value)__
+    def update(sig, treeID, pre, value):
+        pass
+
+    # __search(base64 sig, base64 treeID, string query, base64[] encrypted_content)__
+    def search(sig, treeID, query, encrypted_content):
         pass
 
