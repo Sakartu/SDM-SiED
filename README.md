@@ -30,14 +30,25 @@ Server (S)
 S is basically a wrapper around a database. We will use sqlite3 for portability.
 The wrapper will provide the following functions on top of the database:
 
-__insert(base64 treeID, EncryptedRows[])__
+__add_pubkey(base64 sig, base64 pubkey)__
 
-The insert function  is used to insert data into the database. Any existing rows 
-with the same treeID are first deleted. The treeID parameter indentifies the tree.  
-The XMLData[] provided is a list of rows to insert into the database. 
+THis add pubkey function is used by the consultant to add new client keys. The
+sig is created using the private key of the consultant and the query will be
+executed only if the sig matches a check against the public key of the
+consultant.
+
+__insert(base64 sig, base64 treeID, string EncryptedRows[])__
+
+The insert function is used to insert data into the database. Any existing rows
+with the same treeID are first deleted. The treeID parameter indentifies the
+tree.  The XMLData[] provided is a list of rows to insert into the database.
 These rows will look like: 
 
 > \<base64 treeID, int pre, int post, int parent, base64 Cval\>
+
+Finally, the sig is a signature over all the other values of the function
+concatenated. This signature is created by the client using his or her private
+key and can be validated by the server using a list of public keys.
 
 Following [1] inserting data in the database isn't as easy as it looks. Each
 time new data is inserted all rows that have a higher pre value have to be
@@ -49,18 +60,19 @@ another client's treeID. This is why each of the shards belonging to one treeID
 contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
-__update(base64 treeID, int pre, base64 value)__
+__update(base64 sig, base64 treeID, int pre, base64 value)__
 
 Updating a row in the database is rather easy. Each node in a tree is uniquely 
 identified by its pre value. So, if a client supplies both treeID and pre then
-the node is uniquely identified.
+the node is uniquely identified. The sig, again, is used to validate this query.
 
-__search(base64 treeID, string query, base64[] XPathEncrypted)__
+__search(base64 sig, base64 treeID, string query, base64[] XPathEncrypted)__
 
 Searching in the database is where the real magic happens. This method can
 evaluate an XPath query in a very fast manner, using the pre, post and parent 
-values stored in each row. As a result to the query a set of result trees is 
-returned, each of which has a rootnode matching the XPath query.
+values stored in each row. As a result to the query a set of result trees is
+returned, each of which has a rootnode matching the XPath query. The sig, again,
+is used to validate this query.
 
 Client (C)
 ----------
