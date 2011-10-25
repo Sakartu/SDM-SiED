@@ -30,14 +30,14 @@ Server (S)
 S is basically a wrapper around a database. We will use sqlite3 for portability.
 The wrapper will provide the following functions on top of the database:
 
-__insert(treeID, EncryptedRows[])__
+__insert(base64 treeID, EncryptedRows[])__
 
 The insert function  is used to insert data into the database. Any existing rows 
 with the same treeID are first deleted. The treeID parameter indentifies the tree.  
 The XMLData[] provided is a list of rows to insert into the database. 
 These rows will look like: 
 
-> \<treeID, pre, post, parent, Cval\>
+> \<base64 treeID, int pre, int post, int parent, base64 Cval\>
 
 Following [1] inserting data in the database isn't as easy as it looks. Each
 time new data is inserted all rows that have a higher pre value have to be
@@ -49,7 +49,7 @@ another client's treeID. This is why each of the shards belonging to one treeID
 contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
-__update(treeID, int pre, byte[] value)__
+__update(base64 treeID, int pre, base64 value)__
 
 Updating a row in the database is rather easy. Each node in a tree is uniquely 
 identified by its pre value. So, if a client supplies both treeID and pre then
