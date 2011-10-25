@@ -52,6 +52,9 @@ Finally, the sig is a signature over all the other values of the function
 concatenated. This signature is created by the client using his or her private
 key and can be validated by the server using a list of public keys.
 
+The __return_value__ of the function is true if the operation was succesful, and 
+false otherwise. 
+
 Following [1] inserting data in the database isn't as easy as it looks. Each
 time new data is inserted all rows that have a higher pre value have to be
 re-encrypted because all their pre values change and the encryption of the data
@@ -68,6 +71,8 @@ Updating a row in the database is rather easy. Each node in a tree is uniquely
 identified by its pre value. So, if a client supplies both treeID and pre then
 the node is uniquely identified. The sig, again, is used to validate this query.
 
+The __return_value__ is true if the operation succeeded, and false otherwise.
+
 __search(base64 sig, base64 treeID, string query, base64[] encrypted_content)__
 
 Searching in the database is where the real magic happens. This method can
@@ -77,6 +82,12 @@ contains a rootnode matching the XPath query. The query itself contains numbers,
 each of which denoting a spot in the encrypted_content list. For instance, in
 the query '/1/2//3[@4="5"]' we substitute each of the numbers x with the content
 on spot encrypted_content[x]. The sig, again, is used to validate this query.
+
+The __return_value__ of this function is an array of strings. Each string 
+represents a single row. The string format is the same as the insert() parameter:
+
+> \<base64 treeID, int pre, int post, int parent, base64 Cval\>
+
 
 Client (C)
 ----------
