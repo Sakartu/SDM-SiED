@@ -1,5 +1,6 @@
 from M2Crypto import EVP, RSA, BIO
 import constants
+import os
 
 
 # AES Encryption stuff
@@ -53,7 +54,7 @@ def sign(keystring, is_file=False, *data):
     #assume key is a keystring
     signEVP = EVP.load_key_bio(bio)
     signEVP.sign_init()
-    signEVP.sign_update(digest(data))
+    signEVP.sign_update(digest(*data))
     return signEVP.sign_final()
 
 def check_sign(keystring, sig, is_file=False, *data):
@@ -71,14 +72,18 @@ def check_sign(keystring, sig, is_file=False, *data):
     pubkey.assign_rsa(rsa)
 
     pubkey.verify_init()
-    pubkey.verify_update(digest(data))
+    pubkey.verify_update(digest(*data))
     if pubkey.verify_final(sig) == 1:
         return True
     else:
         return False
 
 def digest(*data):
-    d = "".join(str(a) for a in data[0])
+    d = "".join(str(a) for a in data)
     dgst = EVP.MessageDigest(constants.SIG_HASH_ALG)
     dgst.update(d)
     return dgst.digest()
+
+# filesystem stuff
+def preparse_path(path):
+    return os.path.expanduser(os.path.expandvars(path))
