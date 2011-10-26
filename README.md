@@ -32,14 +32,14 @@ Server (S)
 S is basically a wrapper around a database. We will use sqlite3 for portability.
 The wrapper will provide the following functions on top of the database:
 
-__add_pubkey(base64 sig, base64 pubkey)__
+__add_pubkey(base64 sig, int client_id, base64 treeID, base64 pubkey)__
 
 The add pubkey function is used by the consultant to add new client keys. The
 sig is created using the private key of the consultant and the query will be
 executed only if the sig matches a check against the public key of the
 consultant. This public key is built into the system.
 
-__insert(base64 sig, base64 treeID, string[] EncryptedRows)__
+__insert(base64 sig, int client_id, base64 treeID, string[] EncryptedRows)__
 
 The insert function is used to insert data into the database. Any existing rows
 with the same treeID are first deleted. The treeID parameter indentifies the
@@ -65,7 +65,7 @@ another client's encryption key. This is why each of the shards belonging to one
 treeID contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
-__update(base64 sig, base64 treeID, int pre, base64 value)__
+__update(base64 sig, int client_id, base64 treeID, int pre, base64 value)__
 
 Updating a row in the database is rather easy. Each node in a tree is uniquely 
 identified by its pre value. So, if a client supplies both treeID and pre then
@@ -73,7 +73,7 @@ the node is uniquely identified. The sig, again, is used to validate this query.
 
 The __return_value__ is true if the operation succeeded, and false otherwise.
 
-__search(base64 sig, base64 treeID, string query, base64[] encrypted_content)__
+__search(base64 sig, int client_id, base64 treeID, string query, base64[] encrypted_content)__
 
 Searching in the database is where the real magic happens. This method can
 evaluate an XPath query in a very fast manner, using the pre, post and parent
