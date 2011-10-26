@@ -1,6 +1,9 @@
 import hashlib
 import util.util as util
-import util.constants as constants
+import db.db as db
+import logging
+
+logger = logging.getLogger()
 
 class SiEDRPCHandler:
     def __init__(self, conf):
@@ -16,22 +19,25 @@ class SiEDRPCHandler:
 
     def testcrypto(self, ctext):
         key = hashlib.sha512('jemoeder').digest()
-        print repr(util.decrypt(key, ctext))
+        logger.info(repr(util.decrypt(key, ctext)))
 
-    # __add_pubkey(base64 sig, base64 pubkey)__
-    def add_pubkey(sig, pubkey):
+    def add_pubkey(self, sig, client_id, tree_id, pubkey):
         #first we check the validity of the query using sig
+        if self.conf['check_sigs'] and not self.__check_sig(sig, pubkey):
+            logger.warn('Received command for which signature doesn\'t match, ignoring!')
+            return
+        #then we add the pubkey to the database
+        db.add_pubkey(self.conf, client_id, tree_id, pubkey)
+
+    def insert(self, sig, treeID, encrypted_rows):
         pass
 
-    # __insert(base64 sig, base64 treeID, string[] EncryptedRows)__
-    def insert(sig, treeID, encrypted_rows):
+    def update(self, sig, treeID, pre, value):
         pass
 
-    # __update(base64 sig, base64 treeID, int pre, base64 value)__
-    def update(sig, treeID, pre, value):
+    def search(self, sig, treeID, query, encrypted_content):
         pass
 
-    # __search(base64 sig, base64 treeID, string query, base64[] encrypted_content)__
-    def search(sig, treeID, query, encrypted_content):
+    def __check_sig(self, sig, *args):
         pass
 
