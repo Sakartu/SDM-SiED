@@ -23,7 +23,7 @@ def encrypt(key, data):
     dec += cipher.final()
     return dec
 
-# Padding
+# Padding for encryption and decryption
 def paddedlength(data,n):
     if len(data) % n == 0:
         return len(data)
