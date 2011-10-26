@@ -138,7 +138,23 @@ Output:
 
 * If the query was succesful (yes/no). If an error occured, the reason should be displayed.
 
+Nice Links
+==========
 
-
+<table>
+	<tr>
+		<th>link</th>
+		<th>explanation</th>
+	</tr>
+	<tr>
+		<td>
+		"link"<http://www.inf.uni-konstanz.de/dbis/teaching/ws0304/datatypes/download/paper-xpath-accelerator.pdf>
+		</td>
+		<td>
+		Information about storing xml in databases using pre- and post-order
+		traversal
+		</td>
+	</tr>
+</table>
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
