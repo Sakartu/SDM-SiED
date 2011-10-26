@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python -u
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from rpc_handler.handler import SiEDRPCHandler
 from db import db
@@ -12,12 +12,12 @@ import util.util as util
 conf = { #config parameters
         'db_location' : '~/.sied/sied.db',
         'db_conn' : None,
-        'check_sigs' : False,
+        'check_sigs' : True,
         'debug' : False,
         #'logfile' : '~/SiED.log',
         }
 
-dry_run = True
+dry_run = False
 debug = True
 
 
@@ -28,9 +28,9 @@ def main():
     db.initialize(conf)
     
     if not dry_run:
-        server = SimpleXMLRPCServer(("wlan235233.mobiel.utwente.nl", 8000))
+        server = SimpleXMLRPCServer(("localhost", 8000), allow_none=True)
         server.register_introspection_functions()
-        server.register_instance(SiEDRPCHandler())
+        server.register_instance(SiEDRPCHandler(conf))
         server.serve_forever()
     else:
         s = SiEDRPCHandler(conf)
