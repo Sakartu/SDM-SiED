@@ -1,15 +1,25 @@
+import logging
+from util import util
+from db import db
+
+logger = logging.getLogger()
 
 class SigChecker(object):
-    def __init__(self, conf):
-        self.conf = conf
+    def __call__(self, fun):
+        def wrapped_fun(*args):
+            conf = args[0].conf
 
-    def __call__(self, f):
-        if self.conf['check_sigs']:
-            #check the signature
+            if conf['check_sigs']:
+                #check the signature
+                sig = args[1]
+                client_id = args[2]
+                tree_id = args[3]
+                #report if wrong
+                logger.debug('Checking signature for {0}'.format(fun.__name__))
+                key = db.fetch_key(conf, client_id)
+                if utils.check_sign(
+                
 
-            #then call the function again with the args
-            def wrapped_f(*args):
-                f(*args)
-            return wrapped_f
-        else:
-            return f
+            fun(*args)
+        return wrapped_fun
+        
