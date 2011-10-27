@@ -6,31 +6,30 @@ import hashlib
 import logging
 import os
 import sys
-import util.util as util
+from util import util
 
 
 conf = { #config parameters
         'db_location' : '~/.sied/sied.db',
         'db_conn' : None,
         'check_sigs' : True,
-        'debug' : False,
+        'debug' : True,
+        'consultant_key' : './keys/consultant.pub.pem'
         #'logfile' : '~/SiED.log',
         }
 
 dry_run = False
-debug = True
-
 
 def main():
     setup_logging()
     logger = logging.getLogger()
-    logger.info('bla2')
     db.initialize(conf)
     
     if not dry_run:
-        server = SimpleXMLRPCServer(("localhost", 8000), allow_none=True)
+        server = SimpleXMLRPCServer(("localhost", 8000), logRequests=False, allow_none=True)
         server.register_introspection_functions()
         server.register_instance(SiEDRPCHandler(conf))
+        logger.info('XMLRPCServer setup, starting...')
         server.serve_forever()
     else:
         s = SiEDRPCHandler(conf)
