@@ -22,23 +22,19 @@ class Tests(unittest.TestCase):
         self.assertEqual(str(a) + str(b), self.server.test(a, b))
 
     def test_pubkey_add(self):
-        client_id = 1
-        tree_id = util.digest(client_id)
-        sig = util.sign(self.consultant_privkey, True, client_id, b64encode(tree_id), self.client_pubkey)
+        sig = util.sign(self.consultant_privkey, True, self.client_id, b64encode(self.tree_id), self.client_pubkey)
         #call the server
-        expected = "Added key for client {0}".format(client_id)
-        result = self.server.add_pubkey(b64encode(sig), client_id, b64encode(tree_id), self.client_pubkey)
+        expected = "Added key for client {0}".format(self.client_id)
+        result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
         self.assertEqual(expected, result)
 
     def test_pubkey_add_twice(self):
-        client_id = 1
-        
         consultant_privkey = './keys/consultant.pem'
         client_pubkey = "".join(open('./keys/client1.pub.pem').readlines())
-        sig = util.sign(consultant_privkey, True, client_id, b64encode(self.tree_id), client_pubkey)
-        expected = "Tried to add key for client {0} twice!".format(client_id)
-        self.server.add_pubkey(b64encode(sig), client_id, b64encode(self.tree_id), client_pubkey)
-        result = self.server.add_pubkey(b64encode(sig), client_id, b64encode(self.tree_id), client_pubkey)
+        sig = util.sign(consultant_privkey, True, self.client_id, b64encode(self.tree_id), client_pubkey)
+        expected = "Tried to add key for client {0} twice!".format(self.client_id)
+        self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), client_pubkey)
+        result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), client_pubkey)
         self.assertEqual(expected, result)
 
 
