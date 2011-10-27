@@ -1,20 +1,20 @@
 import hashlib
-import util.util as util
+from util import util
 from util.sig_checker import SigChecker
-import db.db as db
+from db import db
+from db.exceptions import SameKeyException
 import logging
 
 logger = logging.getLogger()
 
-
-
 class SiEDRPCHandler:
+    add_checker = SigChecker('consultant_key')
     checker = SigChecker()
+
     def __init__(self, conf):
         self.conf = conf
 
     def test(self, a, b):
-        print type(a), type(b)
         return str(a) + str(b)
 
     @checker
@@ -22,11 +22,14 @@ class SiEDRPCHandler:
         key = hashlib.sha512('jemoeder').digest()
         logger.info(repr(util.decrypt(key, ctext)))
 
-    @checker
+    @add_checker
     def add_pubkey(self, sig, client_id, tree_id, pubkey):
         logger.info('Adding key for client {id}.'.format(id=client_id))
-        db.add_pubkey(self.conf, client_id, tree_id, pubkey)
-        return "Added key for client {id}".format(id=client_id)
+        try:
+            db.add_pubkey(self.conf, client_id, tree_id, pubkey)
+            return "Added key for client {id}".format(id=client_id)
+        except SameKeyException:
+            return "Tried to add key for client {id} twice!".format(id=client_id)
 
     @checker
     def insert(self, sig, client_id, tree_id, encrypted_rows):
