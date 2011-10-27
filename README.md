@@ -52,7 +52,7 @@ __insert(base64 sig, int client_id, base64 tree_id, string[] EncryptedRows)__
 
 The insert function is used to insert data into the database. Any existing rows
 with the same tree_id are first deleted. The tree_id parameter indentifies the
-tree.  The XMLData[] provided is a list of rows to insert into the database.
+tree.  The EncryptedRows provided is a list of rows to insert into the database.
 These rows will look like: 
 
 > \<base64 tree_id, int pre, int post, int parent, base64 Cval\>
