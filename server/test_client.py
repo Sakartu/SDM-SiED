@@ -10,7 +10,7 @@ class Tests(unittest.TestCase):
         self.server = ServerProxy("http://localhost:8000", allow_none=True)
 
     def tearDown(self):
-        print dir(self.server)
+        self.server.clear_db('moeilijklangcleardbpassword')
 
     def test_conn(self):
         a = 'woei'
@@ -38,6 +38,8 @@ class Tests(unittest.TestCase):
         self.server.add_pubkey(b64encode(sig), client_id, b64encode(tree_id), client_pubkey)
         result = self.server.add_pubkey(b64encode(sig), client_id, b64encode(tree_id), client_pubkey)
         self.assertEqual(expected, result)
+
+
 
 if __name__ == '__main__':
     tests = unittest.main()
