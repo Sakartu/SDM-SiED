@@ -164,7 +164,7 @@ Nice Links
 Link | Explanation
 ---- | -----------
 http://bit.ly/sKadHW | Information about storing xml in databases using pre- and post-order traversal
-http://bit.ly/rvTPVt | The paper we're basing our prototype on
+http://bit.ly/uaERUo | The paper we're basing our prototype on
 
 
 [1] "Efficient Tree Search in Encrypted Data" by Brinkman et. al.
