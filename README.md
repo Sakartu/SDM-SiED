@@ -30,7 +30,13 @@ Server (S)
 ----------
 
 S is basically a wrapper around a database. We will use sqlite3 for portability.
-The wrapper will provide the following functions on top of the database:
+The wrapper will provide the following functions on top of the database. Each of
+functions has a sig and client_id parameter. These parameters are used to 
+validate the query. The client_id can be used to lookup a public key in the 
+database. This public key is then used to validate the signature for the query.
+The signature signs the hash of all the following parameters concatenated.
+For the add_pubkey and del_pubkey methods the pubkey isn't lookup up using the
+client_id; instead the predefined consultant pubkey is used.
 
 __add_pubkey(base64 sig, int client_id, base64 tree_id, base64 pubkey)__
 
