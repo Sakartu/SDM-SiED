@@ -51,6 +51,7 @@ class SiEDRPCHandler:
     def search(self, sig, client_id, tree_id, query, encrypted_content):
         pass
 
+    #TODO: for debugging purposes only, remove when done.
     def clear_db(self):
         db.initialize(self.conf)
 
