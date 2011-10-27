@@ -10,7 +10,7 @@ class Tests(unittest.TestCase):
         self.server = ServerProxy("http://localhost:8000", allow_none=True)
 
     def tearDown(self):
-        self.server.clear_db('moeilijklangcleardbpassword')
+        self.server.clear_db()
 
     def test_conn(self):
         a = 'woei'

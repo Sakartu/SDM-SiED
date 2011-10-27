@@ -15,7 +15,6 @@ conf = { #config parameters
         'check_sigs' : True,
         'debug' : True,
         'consultant_key' : './keys/consultant.pub.pem',
-        'clear_db' : 'moeilijklangcleardbpassword',
         #'logfile' : '~/SiED.log',
         }
 

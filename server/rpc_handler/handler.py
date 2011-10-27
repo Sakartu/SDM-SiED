@@ -51,7 +51,6 @@ class SiEDRPCHandler:
     def search(self, sig, client_id, tree_id, query, encrypted_content):
         pass
 
-    def clear_db(self, password):
-        if password == self.conf['clear_db']:
-            db.initialize(self.conf)
+    def clear_db(self):
+        db.initialize(self.conf)
 
