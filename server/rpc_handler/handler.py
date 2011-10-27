@@ -33,7 +33,9 @@ class SiEDRPCHandler:
 
     @consultant_checker
     def del_pubkey(self, sig, client_id, tree_id):
-        pass
+        logger.info('Removing key for client {id}.'.format(id=client_id))
+        db.del_pubkey(self.conf, client_id, tree_id)
+        return "Removed key for client {id}".format(id=client_id)
 
     @checker
     def fetch_pubkey(self, sig, client_id, tree_id):

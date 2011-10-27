@@ -29,15 +29,25 @@ class Tests(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_pubkey_add_twice(self):
-        consultant_privkey = './keys/consultant.pem'
-        client_pubkey = "".join(open('./keys/client1.pub.pem').readlines())
-        sig = util.sign(consultant_privkey, True, self.client_id, b64encode(self.tree_id), client_pubkey)
+        sig = util.sign(self.consultant_privkey, True, self.client_id, b64encode(self.tree_id), self.client_pubkey)
         expected = "Tried to add key for client {0} twice!".format(self.client_id)
-        self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), client_pubkey)
-        result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), client_pubkey)
+        self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
         self.assertEqual(expected, result)
 
+    def test_pubkey_del(self):
+        #first add the key
+        sig = util.sign(self.consultant_privkey, True, self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
 
+        #then remove it
+        sig = util.sign(self.consultant_privkey, True, self.client_id, b64encode(self.tree_id))
+        expected = "Removed key for client {id}".format(id=self.client_id)
+        result = self.server.del_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id))
+        self.assertEqual(expected, result)
+
+    def test_pubkey_fetch(self):
+        pass
 
 if __name__ == '__main__':
     tests = unittest.main()

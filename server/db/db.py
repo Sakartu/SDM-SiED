@@ -41,9 +41,13 @@ def add_pubkey(conf, client_id, tree_id, pubkey):
             logger.warn('Tried to insert pubkey for client {id} twice!'.format(id=client_id))
             raise SameKeyException
 
+def del_pubkey(conf, client_id, tree_id):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        c.execute('DELETE FROM pubkeys WHERE client_id = ? AND tree_id = ?', (client_id, tree_id))
 
 def fetch_key(conf, client_id, tree_id):
     with conf[constants.Conf.DB_CONN] as conn:
         c = conn.cursor()
-        c.execute('SELECT pubkey FROM pubkeys WHERE client_id = ? AND tree_id = ?', client_id, tree_id)
+        c.execute('SELECT pubkey FROM pubkeys WHERE client_id = ? AND tree_id = ?', (client_id, tree_id))
 
