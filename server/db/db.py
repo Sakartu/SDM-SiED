@@ -46,8 +46,12 @@ def del_pubkey(conf, client_id, tree_id):
         c = conn.cursor()
         c.execute('DELETE FROM pubkeys WHERE client_id = ? AND tree_id = ?', (client_id, tree_id))
 
-def fetch_key(conf, client_id, tree_id):
+def fetch_pubkey(conf, client_id, tree_id):
     with conf[constants.Conf.DB_CONN] as conn:
         c = conn.cursor()
         c.execute('SELECT pubkey FROM pubkeys WHERE client_id = ? AND tree_id = ?', (client_id, tree_id))
+        try:
+            return c.fetchone()[0]
+        except:
+            return None
 

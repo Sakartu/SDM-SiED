@@ -39,7 +39,9 @@ class SiEDRPCHandler:
 
     @checker
     def fetch_pubkey(self, sig, client_id, tree_id):
-        pass
+        logger.info('Fetching key for client {id}'.format(id=client_id))
+        result = db.fetch_pubkey(self.conf, client_id, tree_id)
+        return result
 
     @checker
     def insert(self, sig, client_id, tree_id, encrypted_rows):

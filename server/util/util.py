@@ -54,7 +54,7 @@ def sign(keystring, is_file=False, *data):
     if is_file:
         bio = BIO.openfile(keystring)
     else:
-        bio = BIO.MemoryBuffer(keystring)
+        bio = BIO.MemoryBuffer(str(keystring))
     #assume key is a keystring
     signEVP = EVP.load_key_bio(bio)
     signEVP.sign_init()
@@ -76,7 +76,7 @@ def check_sign(keystring, sig, is_file=False, *data):
     if is_file:
         bio = BIO.openfile(keystring)
     else:
-        bio = BIO.MemoryBuffer(keystring)
+        bio = BIO.MemoryBuffer(str(keystring))
     rsa = RSA.load_pub_key_bio(bio)
     pubkey = EVP.PKey()
     pubkey.assign_rsa(rsa)

@@ -26,10 +26,13 @@ class SigChecker(object):
                     if self.allowed:
                         key = "".join(open(conf[self.allowed], 'r').readlines())
                     else:
-                        key = db.fetch_key(conf, client_id, tree_id)
+                        key = db.fetch_pubkey(conf, client_id, tree_id)
+                    if not key:
+                        logger.warn('Couldn\'t find key for {id}'.format(id=client_id))
+                        return None
 
                     logger.debug('Keys found, continuing...')
-                    if util.check_sign(key, b64decode(sig), False, *args[2:]): 
+                    if util.check_sign(str(key), b64decode(sig), False, *args[2:]): 
                         logger.debug('Signature matched, calling function...')
                         return fun(*args)
                     else:
