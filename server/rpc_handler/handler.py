@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger()
 
 class SiEDRPCHandler:
-    add_checker = SigChecker('consultant_key')
+    consultant_checker = SigChecker('consultant_key')
     checker = SigChecker()
 
     def __init__(self, conf):
@@ -22,7 +22,7 @@ class SiEDRPCHandler:
         key = hashlib.sha512('jemoeder').digest()
         logger.info(repr(util.decrypt(key, ctext)))
 
-    @add_checker
+    @consultant_checker
     def add_pubkey(self, sig, client_id, tree_id, pubkey):
         logger.info('Adding key for client {id}.'.format(id=client_id))
         try:
@@ -30,6 +30,14 @@ class SiEDRPCHandler:
             return "Added key for client {id}".format(id=client_id)
         except SameKeyException:
             return "Tried to add key for client {id} twice!".format(id=client_id)
+
+    @consultant_checker
+    def del_pubkey(self, sig, client_id, tree_id):
+        pass
+
+    @checker
+    def fetch_pubkey(self, sig, client_id, tree_id):
+        pass
 
     @checker
     def insert(self, sig, client_id, tree_id, encrypted_rows):
