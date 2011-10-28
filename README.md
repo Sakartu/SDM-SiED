@@ -66,7 +66,7 @@ These rows will look like:
 The XML document is encoded as described in [1], and all text must be encapsulated
 in a <#TEXT> node. All attribute names are prefixed with '@'. For example:
 
-> <test foo="bar">Some text!</test>
+> \<test foo="bar"\>Some text!\</test\>
 
 is equivalent to
 
