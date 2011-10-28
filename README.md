@@ -61,8 +61,35 @@ with the same tree_id are first deleted. The tree_id parameter indentifies the
 tree.  The EncryptedRows provided is a list of rows to insert into the database.
 These rows will look like: 
 
-> \<base64 tree_id, int pre, int post, int parent, base64 Cval\>
+> (base64 tree_id, int pre, int post, int parent, base64 Ctag, base64 Cval)
 
+The XML document is encoded as described in [1], and all text must be encapsulated
+in a <#TEXT> node. All attribute names are prefixed with '@'. For example:
+
+> \<test foo="bar"\>Some text!\</test\>
+
+is equivalent to
+
+   \<test\>
+      \<@foo\>
+         bar
+      \</@foo\>
+      \<#TEXT\>
+         Some text!
+      \</#TEXT\>
+   \</test\>
+
+and will generate the following rows:
+
+   * (tree_id, 1, 0, 0, "@foo", "bar")
+   * (tree_id, 2, 1, 0, "#TEXT", "Some text!")
+   * (tree_id, 0, 2, -1, "test", <random value>)
+
+Note that parent is -1 for the root node, and that normal nodes (that would normally have
+an empty "value" field) are assigned a random value. This ensures the server cannot distinguish
+between the node types. The final step is, of course, to encrypt the tag and value fields to form
+Ctag and Cval.
+   
 Finally, the sig is a signature over all the other values of the function
 concatenated. This signature is created by the client using his or her private
 key and can be validated by the server using a list of public keys.
@@ -101,7 +128,7 @@ on spot encrypted_content[x]. The sig, again, is used to validate this query.
 The __return_value__ of this function is an array of strings. Each string 
 represents a single row. The string format is the same as the insert() parameter:
 
-> \<base64 tree_id, int pre, int post, int parent, base64 Cval\>
+> (base64 tree_id, int pre, int post, int parent, base64 Ctag, base64 Cval)
 
 
 Client (C)
