@@ -32,6 +32,16 @@ class SiEDRPCHandler:
             return "Tried to add key for client {id} twice!".format(id=client_id)
 
     @consultant_checker
+    def clear_keys(self, sig):
+        logger.info('Clearing all keys!.')
+        try:
+            db.clear_keys(self.conf)
+            return True
+        except:
+            return False
+
+
+    @consultant_checker
     def del_pubkey(self, sig, client_id, tree_id):
         logger.info('Removing key for client {id}.'.format(id=client_id))
         db.del_pubkey(self.conf, client_id, tree_id)

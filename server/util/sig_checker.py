@@ -32,7 +32,9 @@ class SigChecker(object):
                         return None
 
                     logger.debug('Keys found, continuing...')
-                    if util.check_sign(str(key), b64decode(sig), False, *args[2:]): 
+                    signargs = fun.__name__
+                    signargs.append(args[2:])
+                    if util.check_sign(str(key), b64decode(sig), False, *signargs): 
                         logger.debug('Signature matched, calling function...')
                         return fun(*args)
                     else:
