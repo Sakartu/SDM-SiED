@@ -78,14 +78,16 @@ in a <#TEXT> node. All attribute names are prefixed with '@'. For example:
 
 is equivalent to
 
-   \<test\>
-      \<@foo\>
+<pre>
+   &lt;test&gt;
+      &lt;@foo&gt;
          bar
-      \</@foo\>
-      \<#TEXT\>
+      &lt;/@foo&gt;
+      &lt;#TEXT&gt;
          Some text!
-      \</#TEXT\>
-   \</test\>
+      &lt;/#TEXT&gt;
+   &lt;/test&gt;
+</pre>
 
 and will generate the following rows:
 
