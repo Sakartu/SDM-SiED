@@ -25,14 +25,14 @@ class Tests(unittest.TestCase):
         self.assertEqual(str(a) + str(b), self.server.test(a, b))
 
     def test_pubkey_add(self):
-        sig = util.sign(self.consultant_privkey, False, self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        sig = util.sign(self.consultant_privkey, False, "add_pubkey", self.client_id, b64encode(self.tree_id), self.client_pubkey)
         #call the server
         expected = "Added key for client {0}".format(self.client_id)
         result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
         self.assertEqual(expected, result)
 
     def test_pubkey_add_twice(self):
-        sig = util.sign(self.consultant_privkey, False, self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        sig = util.sign(self.consultant_privkey, False, "add_pubkey", self.client_id, b64encode(self.tree_id), self.client_pubkey)
         expected = "Tried to add key for client {0} twice!".format(self.client_id)
         self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
         result = self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
@@ -40,21 +40,21 @@ class Tests(unittest.TestCase):
 
     def test_pubkey_del(self):
         #first add the key
-        sig = util.sign(self.consultant_privkey, False, self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        sig = util.sign(self.consultant_privkey, False, "add_pubkey", self.client_id, b64encode(self.tree_id), self.client_pubkey)
         self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
 
         #then remove it
-        sig = util.sign(self.consultant_privkey, False, self.client_id, b64encode(self.tree_id))
+        sig = util.sign(self.consultant_privkey, False, "del_pubkey", self.client_id, b64encode(self.tree_id))
         expected = "Removed key for client {id}".format(id=self.client_id)
         result = self.server.del_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id))
         self.assertEqual(expected, result)
 
     def test_pubkey_fetch(self):
-        sig = util.sign(self.consultant_privkey, False, self.client_id, b64encode(self.tree_id), self.client_pubkey)
+        sig = util.sign(self.consultant_privkey, False, "add_pubkey", self.client_id, b64encode(self.tree_id), self.client_pubkey)
         self.server.add_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id), self.client_pubkey)
 
         #then fetch it
-        sig = util.sign(self.client_privkey, False, self.client_id, b64encode(self.tree_id))
+        sig = util.sign(self.client_privkey, False, "fetch_pubkey", self.client_id, b64encode(self.tree_id))
         expected = self.client_pubkey
         result = self.server.fetch_pubkey(b64encode(sig), self.client_id, b64encode(self.tree_id))
         self.assertEqual(expected, result)
