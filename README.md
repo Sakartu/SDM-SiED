@@ -63,6 +63,14 @@ These rows will look like:
 
 > (base64 tree_id, int pre, int post, int parent, base64 Ctag, base64 Cval)
 
+In this row the meaning of the values are clear, except for the Ctag and Cval
+values. We use the following encoding scheme for these values, where the tuple
+mentioned are the Ctag and Cval values respectively:
+
+- A node is encoded like <E(Nodename), randomData>
+- An attribute is encoded like <E(@Attributename), E(Attributeval)>
+- A text node is encoded like <E(#), E(Textvalue)>
+
 The XML document is encoded as described in [1], and all text must be encapsulated
 in a <#TEXT> node. All attribute names are prefixed with '@'. For example:
 
