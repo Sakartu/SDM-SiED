@@ -109,7 +109,7 @@ another client's encryption key. This is why each of the shards belonging to one
 tree_id contain only one tree, meaning that pre, post and parent values are
 restarted for each shard.
 
-__update(base64 sig, int client_id, base64 tree_id, int pre, base64 value)__
+__update(base64 sig, int client_id, base64 tree_id, int pre, base64 Ctag, base64 Cvalue)__
 
 Updating a row in the database is rather easy. Each node in a tree is uniquely 
 identified by its pre value. So, if a client supplies both tree_id and pre then
