@@ -46,9 +46,11 @@ class SiEDRPCHandler:
     @checker
     def insert(self, sig, client_id, tree_id, encrypted_rows):
         try:
+            logger.info('Inserting new rows for {id}.'.format(id=client_id))
             db.insert_tree(self.conf, tree_id, encrypted_rows)
             return True
-        except: #if all went well we return True, else we rollback
+        except Exception, e: #if all went well we return True, else we rollback
+            logger.error(e)
             return False
 
     @checker
