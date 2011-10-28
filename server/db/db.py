@@ -65,7 +65,7 @@ def insert_tree(conf, tree_id, encrypted_rows):
         # first we delete all the required rows:
         c.execute('DELETE FROM trees WHERE tree_id = ?', (tree_id,))
         # then we reinsert
-        c.executemany('INSERT INTO trees VALUES (?, ?, ?, ?, ?)', encrypted_rows)
+        c.executemany('INSERT INTO trees VALUES (?, ?, ?, ?, ?, ?)', encrypted_rows)
 
 def update_tree(conf, tree_id, pre, ctag, cval):
     with conf[constants.Conf.DB_CONN] as conn:
