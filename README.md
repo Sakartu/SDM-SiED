@@ -70,14 +70,14 @@ in a <#TEXT> node. All attribute names are prefixed with '@'. For example:
 
 is equivalent to
 
-   <test>
-      <@foo>
+   \<test\>
+      \<@foo\>
          bar
-      </@foo>
-      <#TEXT>
+      \</@foo\>
+      \<#TEXT\>
          Some text!
-      </#TEXT>
-   </test>
+      \</#TEXT\>
+   \</test\>
 
 and will generate the following rows:
 
