@@ -45,7 +45,11 @@ class SiEDRPCHandler:
 
     @checker
     def insert(self, sig, client_id, tree_id, encrypted_rows):
-        pass
+        try:
+            db.insert_tree(self.conf, tree_id, encrypted_rows)
+            return True
+        except: #if all went well we return True, else we rollback
+            return False
 
     @checker
     def update(self, sig, client_id, tree_id, pre, value):

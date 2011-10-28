@@ -30,7 +30,11 @@ def initialize(conf):
         c.execute('''CREATE TABLE IF NOT EXISTS pubkeys(client_id int, tree_id
                 text, pubkey text)''')
         c.execute('''CREATE UNIQUE INDEX IF NOT EXISTS pubkey_index ON
-        pubkeys(client_id, tree_id)''')
+                pubkeys(client_id, tree_id)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS trees(tree_id text, pre int,
+                post int, parent int, val BLOB)''')
+        c.execute('''CREATE UNIQUE INDEX IF NOT EXISTS tree_index ON
+                trees(tree_id, pre, post, parent)''')
 
 def add_pubkey(conf, client_id, tree_id, pubkey):
     with conf[constants.Conf.DB_CONN] as conn:
@@ -54,4 +58,12 @@ def fetch_pubkey(conf, client_id, tree_id):
             return c.fetchone()[0]
         except:
             return None
+
+def insert_tree(conf, tree_id, encrypted_rows):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        # first we delete all the required rows:
+        c.execute('DELETE FROM trees WHERE tree_id = ?', (tree_id,))
+        # then we reinsert
+        c.executemany('INSERT INTO trees VALUES (?, ?, ?, ?, ?)', encrypted_rows)
 
