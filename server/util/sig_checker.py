@@ -37,6 +37,8 @@ class SigChecker(object):
                         return fun(*args)
                     else:
                         logger.warn('Signature didn\'t match for {0}'.format(fun.__name__))
+                else:
+                    return fun(*args)
             except:
                 traceback.print_exc()
         return wrapped_fun
