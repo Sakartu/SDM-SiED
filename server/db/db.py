@@ -32,7 +32,7 @@ def initialize(conf):
         c.execute('''CREATE UNIQUE INDEX IF NOT EXISTS pubkey_index ON
                 pubkeys(client_id, tree_id)''')
         c.execute('''CREATE TABLE IF NOT EXISTS trees(tree_id text, pre int,
-                post int, parent int, val BLOB)''')
+                post int, parent int, ctag BLOB, cval BLOB)''')
         c.execute('''CREATE UNIQUE INDEX IF NOT EXISTS tree_index ON
                 trees(tree_id, pre, post, parent)''')
 
@@ -66,4 +66,18 @@ def insert_tree(conf, tree_id, encrypted_rows):
         c.execute('DELETE FROM trees WHERE tree_id = ?', (tree_id,))
         # then we reinsert
         c.executemany('INSERT INTO trees VALUES (?, ?, ?, ?, ?)', encrypted_rows)
+
+def update_tree(conf, tree_id, pre, ctag, cval):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        c.execute('''UPDATE trees SET ctag = ?, cval = ? WHERE tree_id = ? and
+                pre = ?''', (ctag, cval, tree_id, pre,))
+
+def fetch_tree(conf, tree_id):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        c.execute('''SELECT * from trees WHERE tree_id = ?''', (tree_id,))
+        return c.fetchall()
+
+
 

@@ -12,9 +12,11 @@ from util import util
 conf = { #config parameters
         'db_location' : '~/.sied/sied.db',
         'db_conn' : None,
-        'check_sigs' : True,
+        'check_sigs' : False,
         'debug' : True,
         'consultant_key' : './keys/consultant.pub.pem',
+        'host' : '192.168.1.100',
+        'port' : 8000,
         #'logfile' : '~/SiED.log',
         }
 
@@ -26,7 +28,7 @@ def main():
     db.initialize(conf)
     
     if not dry_run:
-        server = SimpleXMLRPCServer(("localhost", 8000), logRequests=False, allow_none=True)
+        server = SimpleXMLRPCServer((conf['host'], conf['port']), logRequests=True, allow_none=True)
         server.register_introspection_functions()
         server.register_instance(SiEDRPCHandler(conf))
         logger.info('XMLRPCServer setup, starting...')

@@ -1,5 +1,5 @@
 import hashlib
-from util import util
+from util import xpath, util
 from util.sig_checker import SigChecker
 from db import db
 from db.exceptions import SameKeyException
@@ -52,11 +52,38 @@ class SiEDRPCHandler:
             return False
 
     @checker
-    def update(self, sig, client_id, tree_id, pre, value):
-        pass
+    def update(self, sig, client_id, tree_id, pre, ctag, cvalue):
+        try:
+            db.update_tree(self.conf, tree_id, pre, ctag, cvalue)
+            return True
+        except:
+            return False
 
     @checker
     def search(self, sig, client_id, tree_id, query, encrypted_content):
+        if not query:
+            return False
+
+        tokens = query.split('/')
+        if tokens[0] == '':
+            tokens = tokens[1:]
+
+        #>>> "bla/bla2//bla3[bla4=bla5]".split('/')
+        #['bla', 'bla2', '', 'bla3[bla4=bla5]']
+        records = db.fetch_tree(self.conf, tree_id)
+
+        for token in tokens:
+            if token == '':
+                #so we had a //
+                pass
+            elif not '[' in token:
+                pass
+                #so a normal node
+            else:
+                pass
+                #so an attribute
+
+
         pass
 
     #TODO: for debugging purposes only, remove when done.
