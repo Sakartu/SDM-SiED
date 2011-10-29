@@ -83,6 +83,8 @@ class SiEDRPCHandler:
         #>>> "bla/bla2//bla3[bla4=bla5]".split('/')
         #['bla', 'bla2', '', 'bla3[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
+        if records:
+            return records
 
         for token in tokens:
             if token == '':
