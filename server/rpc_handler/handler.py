@@ -2,6 +2,7 @@ import hashlib
 from util import xpath, util
 from util.sig_checker import SigChecker
 from db import db
+from operator import itemgetter
 from db.exceptions import SameKeyException
 import logging
 
@@ -97,7 +98,7 @@ class SiEDRPCHandler:
                 #so an attribute
 
         # sort records list based on pre values.
-        return sorted(records, key=lambda row : row[1])
+        return sorted(records, key=itemgetter(1))
 
     #TODO: for debugging purposes only, remove when done.
     def clear_db(self):
