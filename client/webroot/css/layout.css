@@ -436,7 +436,7 @@ div.notifications li {
     border: none;
 }
 
-.clientInfo .minimizedText {
+.minimizedText {
     display: block;
     line-height: 30px;
     float: left;
@@ -509,4 +509,76 @@ div.notifications li {
     border: 1px solid #B8E78B;
     font-size: large;  
 }
+
+
+
+
+/* RESULTS */
+
+.queryStr {
+    font-size: large;
+    padding-left: 5px;
+    font-weight: bold;    
+}
+
+.queryDescr {
+    line-height: 22px;
+    display: block;
+    width: 100px;
+    height: 22px;
+    float: left;
+}
+
+.fakeLink {
+    float: right;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 11px;
+    color: #5E9040;    
+}
+
+tr.light {
+    background-color: white;
+}
+
+.resultBlock {
+    width: 100%;
+    background-color: #E5EECC;
+    background-repeat: repeat-x;
+    border: 1px solid #D4D4D4;
+    clear: both;
+    color: #000000;
+    margin: 0;
+    margin-top: 20px;
+    padding: 8px;    
+}
+
+.resultXml 
+{
+    background-color: #FFFFFF;
+    border: 1px solid #D4D4D4;
+    font-family: courier new;
+    font-size: 110%;
+    padding: 4px;
+}
+
+.tabSpan {
+    padding-right: 12px;
+}
+
+.textElem {
+    color: #2E5F0F;
+    font-weight: bold;
+}
+
+.nodeElem:hover {
+    background-color: black;
+    color: white;
+    cursor: pointer;
+}
+
+
+
+
+
 

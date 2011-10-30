@@ -1,52 +1,10 @@
 <?php
 
-
-/*
-$privateKey = openssl_pkey_new(array(
-    'private_key_bits' => 1024,
-    'private_key_type' => OPENSSL_KEYTYPE_RSA,
-)); 
- 
-echo "<pre>";
-print_r($privateKey);
-echo "--done--";
-echo "</pre>";
-die();
-
-
-$crypt = new SdmAsymmetricCrypt();
-$res = $crypt->generateKeys();
-
-echo "<pre>";
-openssl_pkey_export($res['private'], $outt);
-print_r($outt);
-
-        
-        $keyDetails = openssl_pkey_get_details($privateKey);
-        $publicKey = $keyDetails['key'];
-        
-        $result = array();
-        $result['private'] = $privateKey;
-        $result['public'] = $publicKey;
-        
- * 
- * 
- * 
- * 
-echo "<br/>";
-$p1 = openssl_get_privatekey($outt);
-$p2 = openssl_pkey_get_details($p1);
-echo($p1."<br/>".$p2['key']);
-//print_r($res);
-//get_class($res['private']);
-//get_class_vars($res['private']);
-echo "</pre>";
-*/
-
+//SdmAsymmetricCrypt::publicDecrypt(1, SdmAsymmetricCrypt::privateEncrypt(1, "encrypt_this"));
 
 class SdmAsymmetricCrypt
 {
-
+    
     public static function generateKeys() 
     {
         $privateKey = openssl_pkey_new(array(
@@ -56,46 +14,102 @@ class SdmAsymmetricCrypt
         
         openssl_pkey_export($privateKey, $result);
         
+        openssl_free_key($privateKey);
         return $result;
     }
 
 
-    public static function encrypt($clientId, $message)
+    public static function privateEncrypt($clientId, $message)
     {
-        //openssl_private_encrypt()
+        $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE `id` = :id");
+        $qry->execute(array(':id' => $clientId));
+        $result = $qry->fetch(PDO::FETCH_ASSOC);
+        
+        $rsa_keys = $result['rsa_keys'];
+        $pKey = openssl_get_privatekey($rsa_keys);
+        
+        $result = '';
+        openssl_private_encrypt($message, $result, $pKey);
+        
+        //echo "\n".$result."\nlen:".strlen($result);
+        
+        openssl_free_key($pKey);
+        return $result;
     }
     
-    public static function decrypt($clientId, $message)
+    public static function publicDecrypt($clientId, $cipher)
     {
+        $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE `id` = :id");
+        $qry->execute(array(':id' => $clientId));
+        $result = $qry->fetch(PDO::FETCH_ASSOC);
         
+        $rsa_keys = $result['rsa_keys'];
+        $pKey = openssl_get_privatekey($rsa_keys);
+        $keyDetails = openssl_pkey_get_details($pKey);
+        $publicKey = $keyDetails['key'];
+        
+        $result = '';
+        openssl_public_decrypt($cipher, $result, $publicKey); 
+        
+        //echo "\n".$result."\nlen:".strlen($result);
+        
+        openssl_free_key($pKey);
+        return $result;
     }
     
-    public static function sign()
+    /**
+     * Extracts the public key from the RSA PEM format.
+     */
+    public static function getPublicKey($pemFormat)
     {
-    /*
-    The list of Signature Algorithms (constants) is very limited! Fortunately the newer versions of php/openssl allow you to specify the signature algorithm as a string.
+            $privateKey = openssl_get_privatekey($pemFormat);
+            $keyDetails = openssl_pkey_get_details($privateKey);
+            $publicKey = $keyDetails['key'];
+            
+            openssl_free_key($privateKey);
+            return $publicKey;
+    }
     
-    You can use the 'openssl_get_md_methods' method to get a list of digest methods. Only some of them may be used to sign with RSA private keys.
-    
-    Those that can be used to sign with RSA private keys are: md4, md5, ripemd160, sha, sha1, sha224, sha256, sha384, sha512
-    
-    Here's the modified Example #1 with SHA-512 hash:
-    <?php
-    // $data is assumed to contain the data to be signed
-    
-    // fetch private key from file and ready it
-    $fp = fopen("/src/openssl-0.9.6/demos/sign/key.pem", "r");
-    $priv_key = fread($fp, 8192);
-    fclose($fp);
-    $pkeyid = openssl_get_privatekey($priv_key);
-    
-    // compute signature with SHA-512
-    openssl_sign($data, $signature, $pkeyid, "sha512");
-    
-    // free the key from memory
-    openssl_free_key($pkeyid);
-    */
+    public static function clientSign($clientId, $message)
+    {
+        $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE `id` = :id");
+        $qry->execute(array(':id' => $clientId));
+        $result = $qry->fetch(PDO::FETCH_ASSOC);
         
+        $rsa_keys = $result['rsa_keys'];
+        $pKey = openssl_get_privatekey($rsa_keys);
+
+        //echo "<pre>".$clientId."\n\n\n".$message."   --  ".$pKey.'  with sha512'."\n";
+        
+        $result = '';
+        openssl_sign($message, $result, $pKey, "sha512");
+        $result = base64_encode($result);
+        
+        //echo "\n".$result."\nlen:".strlen($result)."</pre>";
+        
+        openssl_free_key($pKey);
+        return $result;
+    }
+    
+    public static function consultantSign($message)
+    {        
+        $fp = fopen($_SESSION['consultant_pem_loc'], "r");
+        $priv_key = fread($fp, 8192);
+        fclose($fp);
+
+        $pKey = openssl_get_privatekey($priv_key);
+        
+        //echo "<pre>".$priv_key."\n\n\n".$message."   --  ".$pKey.'  with sha512'."\n";
+        
+        $result = '';
+        openssl_sign($message, $result, $pKey, "sha512");
+        $result = base64_encode($result);
+        
+        //echo "\n".$result."\nlen:".strlen($result)."</pre>";
+
+        // free the key from memory
+        openssl_free_key($pKey);
+        return $result;
     }
     
 

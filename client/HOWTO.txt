@@ -1,0 +1,51 @@
+|--------------------------|
+|       SDM 2010-2011      |
+| Search in Encrypted Data |
+|   CLIENT APPLICATION     |
+|--------------------------|
+
+Installation instructions:
+
+1) Install required packages:
+$ sudo apt-get install php5-mcrypt php5-xmlrpc
+$ sudo /etc/init.d/apache2 restart
+
+2) Create empty database:
+$ chmod 777 ./webroot/db/
+$ touch webroot/db/sdm_db.sqlite
+$ chmod 777 webroot/db/sdm_db.sqlite
+
+3) Point Apache to the webroot/ directory:
+For default apache2 configuration:
+$ ln -s /home/user/sdm/client/webroot/ /var/www/sdm
+
+
+For only local access enter the text below in:
+/etc/apache2/sites-available/default
+
+
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+
+        DocumentRoot /var/www
+        <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+        <Directory /var/www/>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                Allow from 127.0.0.0/255.0.0.0 ::1/128
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
