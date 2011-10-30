@@ -83,9 +83,8 @@ class SiEDRPCHandler:
         #>>> "bla/bla2//bla3[bla4=bla5]".split('/')
         #['bla', 'bla2', '', 'bla3[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
-        if records:
-            return records
 
+        # filter records according to query
         for token in tokens:
             if token == '':
                 #so we had a //
@@ -97,8 +96,8 @@ class SiEDRPCHandler:
                 pass
                 #so an attribute
 
-
-        pass
+        # sort records list based on pre values.
+        return sorted(records, key=lambda row : row[1])
 
     #TODO: for debugging purposes only, remove when done.
     def clear_db(self):
