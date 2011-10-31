@@ -94,6 +94,22 @@ def digest(*data):
     dgst.update(d)
     return dgst.digest()
 
+
 # filesystem stuff
 def preparse_path(path):
     return os.path.expanduser(os.path.expandvars(path))
+
+
+# paper algo stuff
+def matching(rows, xi, ki, index):
+    result = []
+    for row in rows:
+        cval = row[index]
+        tp = cval ^ xi
+        sp1 = tp[:len(tp)*constants.SPLIT_FACTOR]
+        sp2 = tp[constants.SPLIT_FACTOR:]
+        # assuming sp2 and encrypt(ki, sp1) are of equal length, if not, don't
+        # append
+        if sp2 == encrypt(ki, sp1)[len(sp2):]:
+            result.apped(row)
+

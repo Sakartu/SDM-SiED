@@ -8,3 +8,6 @@ class DB:
 
 class Conf:
     DB_CONN = 'db_conn'
+
+class Algo:
+    SPLIT_FACTOR = 0.5

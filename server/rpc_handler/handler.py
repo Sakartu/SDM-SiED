@@ -60,7 +60,7 @@ class SiEDRPCHandler:
             logger.info('Inserting new rows for {id}.'.format(id=client_id))
             db.insert_tree(self.conf, tree_id, encrypted_rows)
             return True
-        except Exception, e: #if all went well we return True, else we rollback
+        except Exception, e: # if all went well we return True, else we rollback
             logger.error(e)
             return False
 
@@ -81,26 +81,33 @@ class SiEDRPCHandler:
         if tokens[0] == '':
             tokens = tokens[1:]
 
-        #>>> "bla/bla2//bla3[bla4=bla5]".split('/')
-        #['bla', 'bla2', '', 'bla3[bla4=bla5]']
+        # >>> "bla/bla2//bla3[bla4=bla5]".split('/')
+        # ['bla', 'bla2', '', 'bla3[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
 
         # filter records according to query
         for token in tokens:
             if token == '':
-                #so we had a //
+                # so we had a //
                 pass
             elif not '[' in token:
                 pass
-                #so a normal node
+                # so a normal node
+                # we first retrieve the corresponding encrypted_content:
+                node = int(token)
+                xi = encrypted_content[node][0]
+                ki = encrypted_content[node][1]
+                # now we look for every node that matches
+                matches = util.matching(records, xi, ki, 4)
+                records = xpath.get_children(records, matches)
             else:
                 pass
-                #so an attribute
+                # so an attribute
 
         # sort records list based on pre values.
         return sorted(records, key=itemgetter(1))
 
-    #TODO: for debugging purposes only, remove when done.
+    # TODO: for debugging purposes only, remove when done.
     def clear_db(self):
         db.initialize(self.conf)
 
