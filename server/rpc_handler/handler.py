@@ -41,7 +41,6 @@ class SiEDRPCHandler(object):
         except:
             return False
 
-
     @consultant_checker
     def del_pubkey(self, sig, client_id, tree_id):
         logger.info('Removing key for client {id}.'.format(id=client_id))
