@@ -90,7 +90,6 @@ class SiEDRPCHandler(object):
         # ['bla', 'bla2', '', 'bla3', '[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
         all_records = records[:]
-        print all_records
         # filter records according to query
         i = 0
         while i < len(tokens):
