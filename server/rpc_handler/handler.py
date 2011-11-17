@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger()
 
-class SiEDRPCHandler:
+class SiEDRPCHandler(object):
     consultant_checker = SigChecker('consultant_key')
     checker = SigChecker()
 

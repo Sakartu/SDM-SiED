@@ -2,6 +2,7 @@
 require_once(dirname(__FILE__).'/../lib/sdm_util.php');
 require_once(dirname(__FILE__).'/../lib/sdm_symmetric_crypt.php');
 require_once(dirname(__FILE__).'/../lib/sdm_asymmetric_crypt.php');
+require_once(dirname(__FILE__).'/../lib/sdm_xmlrpc_stubs.php');
 
 $redirect = false;
 
@@ -43,7 +44,7 @@ else if (isset($_POST['add']))
             {
                 $success = false;
                 addNotification("Error: username is not unique.");
-            }   
+            }
         }
     } 
     else {
@@ -122,22 +123,24 @@ else if (isset($_POST['add']))
         }
     }
     
-    // If the hash key was valid, generate rsa key information and submit it to the server.
+    // If the hash key was valid, generate rsa key information
     if ($success) 
     {
         $rsa_keys = SdmAsymmetricCrypt::generateKeys();
-        
-        //TODO: SEND PUBLIC KEY TO SERVER!
-        
     }
     
     // If everything checked out, enter the client into the DB.
     if ($success) 
     {
-        $qry = $db->prepare("INSERT INTO clients (username, encryption_key, hash_key, rsa_keys) VALUES (:username, :encryption_key, :hash_key, :rsa_keys)");
+        $qry = SqliteDb::getDb()->prepare("INSERT INTO clients (username, encryption_key, hash_key, rsa_keys) VALUES (:username, :encryption_key, :hash_key, :rsa_keys)");
         $qry->execute(array(':username' => $username, ':encryption_key' => $encryption_key, ':hash_key' => $hash_key, ':rsa_keys' => $rsa_keys));
         addNotification("Success: Client added to database.");
+        
+        // Re-sync the public keys to the server
+        syncKeys();
     }
+    
+    
     	
     $redirect = true;
 }
@@ -150,18 +153,51 @@ else if (isset($_GET['action']))
 	   $client_id = intval($_GET['id']);
 	   
 	   $sql = 'DELETE FROM clients WHERE id= :client_id';
-	   $qry = $db->prepare($sql);
+	   $qry = SqliteDb::getDb()->prepare($sql);
 	   $qry->execute(array(':client_id' => $client_id));
 
        addNotification('Success: Client information deleted.');
 	   
+       // Re-sync the database keys
+       syncKeys();
+       
 	   $redirect = true;
 	}
+    else if ($_GET['action'] == "sync")
+    {
+        syncKeys();
+
+        $redirect = true;
+    }
 }
 
-if ($redirect)
+
+
+function syncKeys()
 {
+    XmlRpcStubs::clearPublicKeys();
+    
+    $qry = SqliteDb::getDb()->query("SELECT * FROM clients ORDER BY id");
+
+    while ($result = $qry->fetch(PDO::FETCH_ASSOC))
+    {
+        // Each tree_id is the ID of a client, encrypted with that client's encryption_key.
+        $tree_id = SdmSymmetricCrypt::simpleClientEncrypt($result['id'], $result['id']);
+        
+        $pubkey = SdmAsymmetricCrypt::getPublicKey($result['rsa_keys']);
+
+        XmlRpcStubs::addPublicKey($result['id'], $tree_id, $pubkey);
+    }
+
+    addNotification("Success: Public keys synced.");
+}
+
+
+
+if ($redirect)
+{    
     header("Location:index.php?page=config");
     exit;
 }
+
 ?>

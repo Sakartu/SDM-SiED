@@ -1,54 +1,47 @@
 <?php
-    /* CONFIGURATION */
-
-    // Default XML-RPC server
-    $xmlrpc_server_default = "http://localhost:8000/";
-
-    // SQLite Database file location
-    $sqlite_db_path = dirname(__FILE__).'/../db/sdm_db.sqlite';
-
-
-    
-    
     /* SESSION MANAGEMENT */
-    # start session
+    // start session
     session_start();
 
+
+
+    /* CONFIGURATION */
+
+        // Default XML-RPC server
+    $xmlrpc_server_default = "http://localhost:8000/";
     # set the rpc server location
     if (!isset($_SESSION['xmlrpc_server']))
     {
         $_SESSION['xmlrpc_server'] = $xmlrpc_server_default;
     }
-    
-    
+
+    // SQLite Database file location
+    $sqlite_db_path = dirname(__FILE__).'/../db/sdm_db.sqlite';
+
+    // Use XMLRPC connection, or work locally?
+    $_SESSION['xmlrpc_enabled'] = true;
+
+    // Encrypt values before sending them to the server?
+    $_SESSION['use_encryption'] = false;
+
+    $_SESSION['consultant_pem_loc'] = dirname(__FILE__).'/../lib/consultant.pem';
 
     /* DATABASE SETUP */
-    try {
-        $db = new PDO('sqlite:'.$sqlite_db_path);
-        echo('sqlite:'.$sqlite_db_path."\n<br/>");
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        $qry = $db->prepare("CREATE TABLE IF NOT EXISTS clients (id INTEGER, username TEXT, encryption_key TEXT, hash_key TEXT, rsa_keys TEXT, PRIMARY KEY(id))");
-        
-        $qry->execute();
-    }
-    catch(PDOException $e) {
-      die($e->getMessage());
-    }
-    
-    
+    require_once(dirname(__FILE__).'/../lib/sdm_sqlite_connector.php');
+
+
     
     
     /* DATABASE FUNCTIONS */
+    
     /**
      * @return True if the column value is unique in that table, False otherwise. 
      */
     function uniqueCheck($table, $column, $value)
     {
-    	global $db;
         $table_name = addslashes(fixEncoding($table));
         $column_name = addslashes(fixEncoding($column));
-    	$qry = $db->prepare("SELECT COUNT(*) FROM `".$table_name."` WHERE `".$column_name."` = :value");
+    	$qry = SqliteDb::getDb()->prepare("SELECT COUNT(*) FROM `".$table_name."` WHERE `".$column_name."` = :value");
         $qry->execute(array(':value' => $value));
 
         // Return true if first element of the first (and only) row of the result set is equal to ZERO
@@ -97,6 +90,18 @@
             $hex .= dechex(ord($string[$i]));
         }
         return $hex;
+    }
+    
+    function strSumCharcodes($string)
+    {
+        $result = 0;
+        
+        for($i=0; $i < strlen($string); $i++)
+        {
+            $result += ord($string[$i]);
+        }
+        
+        return $result;
     }
 
 ?>

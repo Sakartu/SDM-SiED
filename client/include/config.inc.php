@@ -2,6 +2,8 @@
     require_once(dirname(__FILE__).'/../lib/sdm_util.php');
 
     require_once(dirname(__FILE__).'/../include/config_process.inc.php');
+    
+    require_once(dirname(__FILE__).'/../lib/sdm_symmetric_crypt.php');
 ?>
 
 <h1>Server Information</h1>
@@ -24,7 +26,7 @@
 
 <h1>Client Identities</h1>
 <?php
-$qry = $db->prepare("SELECT * FROM clients");
+$qry = SqliteDb::getDb()->prepare("SELECT * FROM clients");
 $qry->execute();
 
 while ($result = $qry->fetch(PDO::FETCH_ASSOC)) {
@@ -52,6 +54,7 @@ while ($result = $qry->fetch(PDO::FETCH_ASSOC)) {
         <div class="big darkGreen">Add New Client</div>
         <div class="block small green">
             <ul>
+                <li>The consultant manages these identities, and can <a href="?page=config&action=sync">sync</a> the public keys with the server.</li>
                 <li>Username must be unique and at least 3 characters long.</li>
                 <li>Keys must be unique, 128 bits, and entered in <a href="http://home2.paulschou.net/tools/xlate/">base64</a> encoding.</li>
                 <li>Key fields that are left empty will be generated automatically.</li>
