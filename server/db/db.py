@@ -81,8 +81,19 @@ def update_tree(conf, tree_id, pre, ctag, cval):
 def fetch_tree(conf, tree_id):
     with conf[constants.Conf.DB_CONN] as conn:
         c = conn.cursor()
-        c.execute('''SELECT * from trees WHERE tree_id = ?''', (tree_id,))
+        c.execute('''SELECT * FROM trees WHERE tree_id = ?''', (tree_id,))
+        return c.fetchall()
+
+def fetch_parent(conf, root):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        c.execute('''SELECT * FROM trees WHERE pre = ?''', (root[constants.TREE_PARENT],))
         return c.fetchall()
 
 
+def fetch_descendants(conf, root):
+    with conf[constants.Conf.DB_CONN] as conn:
+        c = conn.cursor()
+        c.execute('''SELECT * FROM TREES WHERE pre > ? AND post < ?''', (root[constants.TREE_PRE], root[constants.TREE_POST]))
+        return c.fetchall()
 
