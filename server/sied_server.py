@@ -23,8 +23,7 @@ conf = { #config parameters
 dry_run = False
 
 def main():
-    setup_logging()
-    logger = logging.getLogger()
+    logger = setup_logging()
     db.initialize(conf)
     
     if not dry_run:
@@ -65,6 +64,7 @@ def setup_logging():
         logging.getLogger().addHandler(handler)
     else:
         logging.basicConfig(format=format, datefmt=dateformat, level=level)
+    return logging.getLogger()
 
 
 if __name__ == '__main__':
