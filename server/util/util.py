@@ -47,10 +47,6 @@ def sign(keystring, is_file=False, *data):
     arguments with the given private key string. The key string can either be a
     stringrepresentation of a private key or the path to a .pem file.
     '''
-    #print "Signing data:"
-    #for (i, a) in enumerate(data):
-    #    print '{0}. {1}'.format(i, repr(a))
-    #print "With key: {0}".format(keystring)
     if is_file:
         bio = BIO.openfile(keystring)
     else:
@@ -60,7 +56,6 @@ def sign(keystring, is_file=False, *data):
     signEVP.sign_init()
     signEVP.sign_update(digest(*data))
     sig = signEVP.sign_final()
-    #print "Resulting sig: {0}".format(repr(sig))
     return sig
 
 def check_sign(keystring, sig, is_file=False, *data):
@@ -69,10 +64,6 @@ def check_sign(keystring, sig, is_file=False, *data):
     an arbitrary number of arguments. The key string can either be a
     stringrepresentation of a public key or the path to a .pem file
     '''
-    #print "Checking sig {0} for data:".format(repr(sig))
-    #for (i, a) in enumerate(data):
-    #    print '{0}. {1}'.format(i, repr(a))
-    #print "With key: {0}".format(keystring)
     if is_file:
         bio = BIO.openfile(keystring)
     else:
