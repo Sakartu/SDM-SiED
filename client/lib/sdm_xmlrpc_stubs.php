@@ -144,7 +144,7 @@ class XmlRpcStubs
         //API: insert(base64 sig, int client_id, base64 tree_id, string[] EncryptedRows)
         //TODO: what to sign?
         $sign_string = 'insert';
-        $par_sig = SdmAsymmetricCrypt::clientSign($clientId, $sign_string);
+        $par_sig = SdmAsymmetricCrypt::clientSign($client_id, $sign_string);
 
 
         $par_client_id = $client_id;

@@ -99,13 +99,13 @@ class SdmAsymmetricCrypt
 
         $pKey = openssl_get_privatekey($priv_key);
         
-        //echo "<pre>".$priv_key."\n\n\n".$message."   --  ".$pKey.'  with sha512'."\n";
+        // echo "<pre>".$priv_key."\n\n\n".$message."   --  ".$pKey.'  with sha512'."\n";
         
         $result = '';
         openssl_sign($message, $result, $pKey, "sha512");
         $result = base64_encode($result);
         
-        //echo "\n".$result."\nlen:".strlen($result)."</pre>";
+        // echo "\nRESULT:".$result."\nlen:".strlen($result)."</pre>";
 
         // free the key from memory
         openssl_free_key($pKey);
