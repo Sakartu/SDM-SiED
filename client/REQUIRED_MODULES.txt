@@ -1,2 +1,0 @@
-sudo apt-get install php5-mcrypt php5-xmlrpc
-sudo /etc/init.d/apache2 restart
