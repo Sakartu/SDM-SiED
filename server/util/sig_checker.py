@@ -18,14 +18,15 @@ class SigChecker(object):
                 if conf['check_sigs']:
                     #check the signature
                     sig = args[1]
-                    client_id = args[2]
-                    tree_id = args[3]
+                    if len(args) > 3:
+                        client_id = args[2]
+                        tree_id = args[3]
                     #report if wrong
                     logger.debug('Checking signature for {0}'.format(fun.__name__))
 
                     if self.allowed:
                         key = "".join(open(conf[self.allowed], 'r').readlines())
-                    else:
+                    elif len(args) > 3:
                         key = db.fetch_pubkey(conf, client_id, tree_id)
                     if not key:
                         logger.warn('Couldn\'t find key for {id}'.format(id=client_id))
@@ -33,7 +34,7 @@ class SigChecker(object):
 
                     logger.debug('Keys found, continuing...')
                     signargs = fun.__name__
-                    signargs.append(args[2:])
+                    #signargs.append(args[2:])
                     if util.check_sign(str(key), b64decode(sig), False, *signargs): 
                         logger.debug('Signature matched, calling function...')
                         return fun(*args)
