@@ -1,4 +1,4 @@
-from util.constants.DB import TREE_PRE, TREE_POST, TREE_PARENT
+from constants import DB
 from db import db
 def get_parents(conf, roots):
     result = []
@@ -9,14 +9,14 @@ def get_parents(conf, roots):
 def get_descendants(records, root):
     results = [root]
     for record in records:
-        if root[TREE_PRE] < record[TREE_PRE] and root[TREE_POST] > record[TREE_POST]:
+        if root[DB.TREE_PRE] < record[DB.TREE_PRE] and root[DB.TREE_POST] > record[DB.TREE_POST]:
             results.append(record)
     return results
 
 def get_children(records, root):
     results = [root]
     for record in records: # then append the children
-        if record[TREE_PARENT] == root[TREE_PRE]:
+        if record[DB.TREE_PARENT] == root[DB.TREE_PRE]:
             results.append(record)
     return results
 
