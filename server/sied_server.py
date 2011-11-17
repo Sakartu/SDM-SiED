@@ -38,6 +38,9 @@ def main():
         s.testcrypto(ctext)
 
 def setup_logging():
+    '''
+    A method to setup the logging procedures
+    '''
     #if we're in debugging mode we use loglevel DEBUG, otherwise ERROR              
     level = None                                                                    
     if conf['debug']:                                                             
@@ -65,7 +68,6 @@ def setup_logging():
     else:
         logging.basicConfig(format=format, datefmt=dateformat, level=level)
     return logging.getLogger()
-
 
 if __name__ == '__main__':
     main()
