@@ -1,5 +1,5 @@
 import hashlib
-from util import xpath, util
+from util import xpath, util, constants
 from util.sig_checker import SigChecker
 from db import db
 from operator import itemgetter
@@ -77,35 +77,64 @@ class SiEDRPCHandler:
         if not query:
             return False
 
-        tokens = query.split('/')
-        if tokens[0] == '':
+        (tokens, sep, right) = query.partition('[')
+        tokens = tokens.split('/')
+        if sep and right:
+            tokens.append(sep + right)
+
+        if tokens[0] == '': # we had a slash in front
             tokens = tokens[1:]
 
-        # >>> "bla/bla2//bla3[bla4=bla5]".split('/')
-        # ['bla', 'bla2', '', 'bla3[bla4=bla5]']
+        #        "bla/bla2//bla3[bla4=bla5]"
+        #                    V
+        # ['bla', 'bla2', '', 'bla3', '[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
+        all_records = records[:]
 
         # filter records according to query
-        for token in tokens:
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
             if token == '':
-                # so we had a //
-                pass
+                # so we had a //, consume the next token as well
+                # we first retrieve the corresponding encrypted_content:
+                i += 1
+                token = tokens[i]
+                node = int(token)
+                xi = encrypted_content[node][0]
+                ki = encrypted_content[node][1]
+                # now we look for every node that matches among all descendants
+                descendants = xpath.get_all_descendants(all_records, records)
+                records = util.matching(descendants, xi, ki, constants.TREE_CTAG)
+                i += 1
             elif not '[' in token:
-                pass
                 # so a normal node
                 # we first retrieve the corresponding encrypted_content:
                 node = int(token)
                 xi = encrypted_content[node][0]
                 ki = encrypted_content[node][1]
-                # now we look for every node that matches
-                matches = util.matching(records, xi, ki, 4)
-                records = xpath.get_children(records, matches)
+                # now we look for every node that matches a child of the given roots
+                children = xpath.get_all_children(all_records, records)
+                records = util.matching(children, xi, ki, constants.TREE_CTAG)
+                i += 1
             else:
-                pass
-                # so an attribute
-
+                # so an attribute, we have to check both tagname and value
+                nodes = token.split('=')
+                tag_node = int(nodes[0][1:]) # to strip off the leading [
+                tag_xi = encrypted_content[tag_node][0]
+                tag_ki = encrypted_content[tag_node][1]
+                records = util.matching(records, tag_xi, tag_ki, constants.TREE_CTAG)
+                val_node = int(nodes[1][:-1]) # to strip off the trailing ]
+                val_xi = encrypted_content[val_node][0]
+                val_ki = encrypted_content[val_node][1]
+                records = util.matching(records, val_xi, val_ki, constants.TREE_CVAL)
+                # we have a list of matching attribute nodes, now find their parents
+                records = xpath.get_parents(all_records, records)
+                i += 1
+        # we have a list of matching roots, now retrieve entire subtree for each root
+        result = [db.fetch_subtree(conf, x) for x in records]
         # sort records list based on pre values.
-        return sorted(records, key=itemgetter(1))
+        return sorted(result, key=lambda x : x[0][1])
 
     # TODO: for debugging purposes only, remove when done.
     def clear_db(self):
