@@ -87,13 +87,17 @@ def fetch_tree(conf, tree_id):
 def fetch_parent(conf, root):
     with conf[constants.Conf.DB_CONN] as conn:
         c = conn.cursor()
-        c.execute('''SELECT * FROM trees WHERE pre = ?''', (root[constants.TREE_PARENT],))
+        c.execute('''SELECT * FROM trees WHERE pre = ?''', (root[constants.DB.TREE_PARENT],))
         return c.fetchall()
-
 
 def fetch_descendants(conf, root):
     with conf[constants.Conf.DB_CONN] as conn:
         c = conn.cursor()
-        c.execute('''SELECT * FROM TREES WHERE pre > ? AND post < ?''', (root[constants.TREE_PRE], root[constants.TREE_POST]))
+        c.execute('''SELECT * FROM TREES WHERE pre > ? AND post < ?''', (root[constants.DB.TREE_PRE], root[constants.DB.TREE_POST]))
         return c.fetchall()
+
+def fetch_subtree(conf, root):
+    desc = fetch_descendants(conf, root)
+    desc.append(root)
+    return desc
 
