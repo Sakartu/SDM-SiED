@@ -82,19 +82,24 @@ class SiEDRPCHandler(object):
         if sep and right:
             tokens.append(sep + right)
 
-        if tokens[0] == '': # we had a slash in front
+        # if we have a slash in front, just discard it, we only do absolute paths
+        if tokens[0] == '': 
             tokens = tokens[1:]
 
         #        "bla/bla2//bla3[bla4=bla5]"
         #                    V
         # ['bla', 'bla2', '', 'bla3', '[bla4=bla5]']
-        records = db.fetch_tree(self.conf, tree_id)
-        all_records = records[:]
+        all_records = db.fetch_tree(self.conf, tree_id)
+
+        # start with a virtual rootnode that's the parent of the first node
+        records = [(None, -1, len(all_records) + 1, -1, None, None)]
+
         # filter records according to query
         i = 0
         while i < len(tokens):
             token = tokens[i]
             if token == '':
+                logger.info('Fetching descendants and looking for match...')
                 # so we had a //, consume the next token as well
                 # we first retrieve the corresponding encrypted_content:
                 i += 1
@@ -108,6 +113,7 @@ class SiEDRPCHandler(object):
                 print 'got //, records are', records
                 i += 1
             elif not '[' in token:
+                logger.info('Fetching children and looking for match...')
                 # so a normal node
                 # we first retrieve the corresponding encrypted_content:
                 node = int(token)
@@ -119,16 +125,21 @@ class SiEDRPCHandler(object):
                 print 'got normal node, records are', records
                 i += 1
             else:
+                logger.info('Fetching attribute names and looking for match...')
                 # so an attribute, we have to check both tagname and value
-                nodes = token.split('=')
-                tag_node = int(nodes[0][1:]) # to strip off the leading [
+                nodes = token.translate(None, '["]').split('=') #strip off crap
+                tag_node = int(nodes[0])
                 tag_xi = b64decode(encrypted_content[tag_node][0])
                 tag_ki = b64decode(encrypted_content[tag_node][1])
-                records = util.matching(records, tag_xi, tag_ki, constants.DB.TREE_CTAG)
-                val_node = int(nodes[1][:-1]) # to strip off the trailing ]
+                # we need to match the attributes, so we first retrieve those
+                children = xpath.get_all_children(all_records, records)
+                records = util.matching(children, tag_xi, tag_ki, constants.DB.TREE_CTAG)
+                logger.info('Found {0} tag matching records, filtering...'.format(len(records)))
+                val_node = int(nodes[1])
                 val_xi = b64decode(encrypted_content[val_node][0])
                 val_ki = b64decode(encrypted_content[val_node][1])
                 records = util.matching(records, val_xi, val_ki, constants.DB.TREE_CVAL)
+                logger.info('Found {0} val matching records, returning!'.format(len(records)))
                 # we have a list of matching attribute nodes, now find their parents
                 records = xpath.get_parents(all_records, records)
                 print 'done parsing, results are', records
