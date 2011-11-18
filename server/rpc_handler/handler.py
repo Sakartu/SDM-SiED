@@ -2,6 +2,7 @@ import hashlib
 from util import xpath, util, constants
 from util.sig_checker import SigChecker
 from db import db
+from base64 import b64decode, b64encode
 from operator import itemgetter
 from db.exceptions import SameKeyException
 import logging
@@ -89,7 +90,6 @@ class SiEDRPCHandler(object):
         # ['bla', 'bla2', '', 'bla3', '[bla4=bla5]']
         records = db.fetch_tree(self.conf, tree_id)
         all_records = records[:]
-
         # filter records according to query
         i = 0
         while i < len(tokens):
@@ -100,40 +100,46 @@ class SiEDRPCHandler(object):
                 i += 1
                 token = tokens[i]
                 node = int(token)
-                xi = encrypted_content[node][0]
-                ki = encrypted_content[node][1]
+                xi = b64decode(encrypted_content[node][0])
+                ki = b64decode(encrypted_content[node][1])
                 # now we look for every node that matches among all descendants
                 descendants = xpath.get_all_descendants(all_records, records)
-                records = util.matching(descendants, xi, ki, constants.TREE_CTAG)
+                records = util.matching(descendants, xi, ki, constants.DB.TREE_CTAG)
+                print 'got //, records are', records
                 i += 1
             elif not '[' in token:
                 # so a normal node
                 # we first retrieve the corresponding encrypted_content:
                 node = int(token)
-                xi = encrypted_content[node][0]
-                ki = encrypted_content[node][1]
+                xi = b64decode(encrypted_content[node][0])
+                ki = b64decode(encrypted_content[node][1])
                 # now we look for every node that matches a child of the given roots
                 children = xpath.get_all_children(all_records, records)
-                records = util.matching(children, xi, ki, constants.TREE_CTAG)
+                records = util.matching(children, xi, ki, constants.DB.TREE_CTAG)
+                print 'got normal node, records are', records
                 i += 1
             else:
                 # so an attribute, we have to check both tagname and value
                 nodes = token.split('=')
                 tag_node = int(nodes[0][1:]) # to strip off the leading [
-                tag_xi = encrypted_content[tag_node][0]
-                tag_ki = encrypted_content[tag_node][1]
-                records = util.matching(records, tag_xi, tag_ki, constants.TREE_CTAG)
+                tag_xi = b64decode(encrypted_content[tag_node][0])
+                tag_ki = b64decode(encrypted_content[tag_node][1])
+                records = util.matching(records, tag_xi, tag_ki, constants.DB.TREE_CTAG)
                 val_node = int(nodes[1][:-1]) # to strip off the trailing ]
-                val_xi = encrypted_content[val_node][0]
-                val_ki = encrypted_content[val_node][1]
-                records = util.matching(records, val_xi, val_ki, constants.TREE_CVAL)
+                val_xi = b64decode(encrypted_content[val_node][0])
+                val_ki = b64decode(encrypted_content[val_node][1])
+                records = util.matching(records, val_xi, val_ki, constants.DB.TREE_CVAL)
                 # we have a list of matching attribute nodes, now find their parents
                 records = xpath.get_parents(all_records, records)
+                print 'done parsing, results are', records
                 i += 1
         # we have a list of matching roots, now retrieve entire subtree for each root
-        result = [db.fetch_subtree(conf, x) for x in records]
-        # sort records list based on pre values.
-        return sorted(result, key=lambda x : x[0][1])
+        if records:
+            result = [db.fetch_subtree(self.conf, x) for x in records]
+            # sort records list based on pre values.
+            return sorted(result, key=lambda x : x[0][1])
+        else:
+            return []
 
     # TODO: for debugging purposes only, remove when done.
     def clear_db(self):

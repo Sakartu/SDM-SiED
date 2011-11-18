@@ -18,9 +18,16 @@ class SigChecker(object):
                 if conf['check_sigs']:
                     #check the signature
                     sig = args[1]
+
                     if len(args) > 3:
                         client_id = args[2]
                         tree_id = args[3]
+
+                    if conf['debug'] and len(args) > 3:
+                        print sig
+                        print client_id
+                        print tree_id
+
                     #report if wrong
                     logger.debug('Checking signature for {0}'.format(fun.__name__))
 
