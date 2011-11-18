@@ -10,21 +10,29 @@ def decrypt(key, data):
     A decryption function which takes a keyfile and a ciphertext and returns
     the AES decrypted plaintext of this ciphertext
     '''
-    cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=True, op=0)
+    cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=False, op=0)
     dec = cipher.update(data)
     dec += cipher.final()
-    return dec
+    return dec.rstrip('\0')
 
 def encrypt(key, data):
     ''' 
     An encryption function which takes a keyfile and a plaintext and returns
-    the AES encrypted ciphertext of this plaintext
+    the AES encrypted ciphertext of this plaintext. It will truncate the key on
+    the right amount of bits and uses 16 NULL bytes for the IV.
     '''
-    cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=True, op=1)
-    enc = cipher.update(data)
+    cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=False, op=1)
+    enc = cipher.update(padr(data, 128/8))
     enc += cipher.final()
     return enc
 
+def paddedlength(data,n):
+    if len(data) % n == 0:
+        return len(data)
+    return len(data) + (n - (len(data) % n))
+
+def padr(data,n,c='\0'):
+    return data.ljust(paddedlength(data,n),c)
 
 # RSA signature stuff
 def sign(keystring, is_file=False, *data):
@@ -89,17 +97,13 @@ def matching(rows, xi, ki, index):
     for row in rows:
         check_val = b64decode(row[index])
         tp = string_xor(check_val, xi)
-        print "check_val:", hexlify(check_val)
-        print "xi:", hexlify(xi)
-        print "tp:", hexlify(tp)
         sp1 = tp[:int(len(tp)*constants.Algo.SPLIT_FACTOR)]
         sp2 = tp[int(len(tp)*constants.Algo.SPLIT_FACTOR):]
-        print "sp1, sp2:", hexlify(sp1), hexlify(sp2)
-        print "enc(sp1):", hexlify(encrypt(ki, sp1))
         # assuming sp2 and encrypt(ki, sp1) are of equal length, if not, don't
         # append
         if sp2 == encrypt(ki, sp1)[len(sp2):]:
-            result.apped(row)
+            result.append(row)
+    return result
 
 def string_xor(a, b):
     return ''.join(chr(ord(x) ^ ord(y)) for (x,y) in zip(a,b))
