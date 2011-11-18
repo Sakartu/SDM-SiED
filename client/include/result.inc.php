@@ -2,6 +2,38 @@
     require_once(dirname(__FILE__).'/../model/noderow.php');
     require_once(dirname(__FILE__).'/../lib/sdm_util.php');
     require_once(dirname(__FILE__).'/../include/result_process.inc.php');
+
+            /*
+             * Peek at this array's last element.
+             */
+            function array_peek($array)
+            {
+                $result = NULL;
+                
+                if (!empty($array))
+                {
+                    $result = $array[count($array)-1];
+                }
+                
+                return $result;   
+            }
+            
+            function vNodeId($resultNum, $pre)
+            {
+                return "v_".$resultNum."_".$pre;
+            }
+
+            function tNodeId($resultNum, $pre)
+            {
+                return "t_".$resultNum."_".$pre;
+            }
+
+            function aNodeId($resultNum, $pre)
+            {
+                return "a_".$resultNum."_".$pre;
+            }
+
+
 ?>
 <h1>Results</h1>
 
@@ -122,35 +154,6 @@
                 }
             }
             
-            /*
-             * Peek at this array's last element.
-             */
-            function array_peek($array)
-            {
-                $result = NULL;
-                
-                if (!empty($array))
-                {
-                    $result = $array[count($array)-1];
-                }
-                
-                return $result;   
-            }
-            
-            function vNodeId($resultNum, $pre)
-            {
-                return "v_".$resultNum."_".$pre;
-            }
-
-            function tNodeId($resultNum, $pre)
-            {
-                return "t_".$resultNum."_".$pre;
-            }
-
-            function aNodeId($resultNum, $pre)
-            {
-                return "a_".$resultNum."_".$pre;
-            }
 
             // Render this $nodeRowObjects set.
             echo '<div class="resultBlock">';
