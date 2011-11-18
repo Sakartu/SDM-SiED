@@ -75,7 +75,7 @@ class SiEDRPCHandler(object):
     @checker
     def search(self, sig, client_id, tree_id, query, encrypted_content):
         if not query:
-            return False
+            return []
 
         (tokens, sep, right) = query.partition('[')
         tokens = tokens.split('/')
@@ -137,6 +137,7 @@ class SiEDRPCHandler(object):
         if records:
             result = [db.fetch_subtree(self.conf, x) for x in records]
             # sort records list based on pre values.
+            print sorted(result, key=lambda x : x[0][1])
             return sorted(result, key=lambda x : x[0][1])
         else:
             return []
