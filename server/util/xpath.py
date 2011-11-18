@@ -7,14 +7,14 @@ def get_parents(conf, roots):
     return result
 
 def get_descendants(records, root):
-    results = [root]
+    results = []
     for record in records:
         if root[DB.TREE_PRE] < record[DB.TREE_PRE] and root[DB.TREE_POST] > record[DB.TREE_POST]:
             results.append(record)
     return results
 
 def get_children(records, root):
-    results = [root]
+    results = []
     for record in records: # then append the children
         if record[DB.TREE_PARENT] == root[DB.TREE_PRE]:
             results.append(record)
