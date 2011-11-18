@@ -27,7 +27,7 @@ def main():
     db.initialize(conf)
     
     if not dry_run:
-        server = SimpleXMLRPCServer((conf['host'], conf['port']), logRequests=True, allow_none=True)
+        server = SimpleXMLRPCServer((conf['host'], conf['port']), logRequests=False, allow_none=True)
         server.register_introspection_functions()
         server.register_instance(SiEDRPCHandler(conf))
         logger.info('XMLRPCServer setup, starting...')
