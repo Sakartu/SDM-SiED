@@ -137,8 +137,7 @@ class SiEDRPCHandler(object):
         if records:
             result = [db.fetch_subtree(self.conf, x) for x in records]
             # sort records list based on pre values.
-            print sorted(result, key=lambda x : x[0][1])
-            return sorted(result, key=lambda x : x[0][1])
+            return [sorted(x, key=lambda x : x[1]) for x in result]
         else:
             return []
 
