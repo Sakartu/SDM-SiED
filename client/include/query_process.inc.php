@@ -199,11 +199,11 @@ else if (isset($_POST['query']))
             if (is_array($response) && (count($response) > 0))
             {
                 $nodeRowArrays = array();
-                foreach ($result as $resultInstance) {
+                foreach ($response as $resultInstance) {
                     //$response contains an array of result trees
                     
                     $nodeRows = array();
-                    foreach ($response as $row)
+                    foreach ($resultInstance as $row)
                     {
                         //$row contains the encoded rows:
                         //[0] == treeId
