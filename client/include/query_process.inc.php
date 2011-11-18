@@ -199,8 +199,8 @@ else if (isset($_POST['query']))
             if (is_array($response) && (count($response) > 0))
             {
                 $nodeRowArrays = array();
-                //foreach ($result as $resultInstance) {
-                //$response will in the future contain an array of results, right now it contains the rows for 1 result
+                foreach ($result as $resultInstance) {
+                    //$response contains an array of result trees
                     
                     $nodeRows = array();
                     foreach ($response as $row)
@@ -218,7 +218,7 @@ else if (isset($_POST['query']))
                         $nodeRows[] = serialize($nodeRow);
                     }
                     $nodeRowArrays[] = $nodeRows;
-                // }
+                }
                 
                 
                 $resultArray = array();
