@@ -313,7 +313,7 @@ class SdmSymmetricCrypt
             $plainText = mdecrypt_generic($this->cipher, $cipherText);
 
             //unpad PKCS5
-            $plainText = pkcs5_unpad($plain);
+            $plainText = pkcs5_unpad($plainText);
             
             //echo (sprintf("128-bit decrypted result: \n%s\n\n",$plainText));
 
