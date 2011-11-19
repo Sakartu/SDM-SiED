@@ -3,6 +3,7 @@ from util import xpath, util, constants
 from util.sig_checker import SigChecker
 from db import db
 from base64 import b64decode, b64encode
+from binascii import hexlify
 from operator import itemgetter
 from db.exceptions import SameKeyException
 import logging
@@ -110,7 +111,8 @@ class SiEDRPCHandler(object):
                 # now we look for every node that matches among all descendants
                 descendants = xpath.get_all_descendants(all_records, records)
                 records = util.matching(descendants, xi, ki, constants.DB.TREE_CTAG)
-                print 'got //, records are', records
+                logger.info('Found {0} matching descendants, continuing!'.format(len(records)))
+                logger.debug('got //, records are: ' + str(records))
                 i += 1
             elif not '[' in token:
                 logger.info('Fetching children and looking for match...')
@@ -122,7 +124,8 @@ class SiEDRPCHandler(object):
                 # now we look for every node that matches a child of the given roots
                 children = xpath.get_all_children(all_records, records)
                 records = util.matching(children, xi, ki, constants.DB.TREE_CTAG)
-                print 'got normal node, records are', records
+                logger.info('Found {0} matching children, continuing!'.format(len(records)))
+                logger.debug('got normal node, records are: ' + str(records))
                 i += 1
             else:
                 logger.info('Fetching attribute names and looking for match...')
@@ -138,11 +141,14 @@ class SiEDRPCHandler(object):
                 val_node = int(nodes[1])
                 val_xi = b64decode(encrypted_content[val_node][0])
                 val_ki = b64decode(encrypted_content[val_node][1])
-                records = util.matching(records, val_xi, val_ki, constants.DB.TREE_CVAL)
+                children = xpath.get_all_children(all_records, records)
+                records = util.matching(children, val_xi, val_ki, constants.DB.TREE_CVAL)
                 logger.info('Found {0} val matching records, returning!'.format(len(records)))
-                # we have a list of matching attribute nodes, now find their parents
-                records = xpath.get_parents(all_records, records)
-                print 'done parsing, results are', records
+                # we have a list of matching attribute nodes, now find the
+                # corresponding nodes
+                records = xpath.get_all_parents(all_records, records)
+                records = xpath.get_all_parents(all_records, records)
+                logger.debug('done parsing, results are: ' + str(records))
                 i += 1
         # we have a list of matching roots, now retrieve entire subtree for each root
         if records:
