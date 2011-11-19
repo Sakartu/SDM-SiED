@@ -309,13 +309,17 @@ class SdmSymmetricCrypt
         // Let's decrypt the 128-bit cipherText.
         if (mcrypt_generic_init($this->cipher, $this->key128, $this->iv128) != -1)
         {
+            //echo "mdecrypt_generic(".base64_encode($this->key128).", ".$b64_cipherText.")\n";
+
             $cipherText = base64_decode($b64_cipherText);
             $plainText = mdecrypt_generic($this->cipher, $cipherText);
+            
+            //echo "---".$plainText."---\n";
 
             //unpad PKCS5
             $plainText = pkcs5_unpad($plainText);
             
-            //echo (sprintf("128-bit decrypted result: \n%s\n\n",$plainText));
+            //echo "---".$plainText."---\n";
 
             $result = trim($plainText);
             mcrypt_generic_deinit($this->cipher);
