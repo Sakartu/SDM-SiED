@@ -48,8 +48,8 @@ else if (isset($_POST['xml']))
         }
         else 
         {
-    	    echo '<pre>';
-    		echo htmlentities($xml->asXML())."\n\n<br/>";
+    	    //echo '<pre>';
+    		//echo htmlentities($xml->asXML())."\n\n<br/>";
             
             $cid = $_SESSION['client_id'];
             $treeId = SdmSymmetricCrypt::simpleClientEncrypt($cid, $cid);
@@ -65,7 +65,8 @@ else if (isset($_POST['xml']))
             
             XmlRpcStubs::insertAndReplace($_SESSION['client_id'], $nodeRowArray);
             
-    		echo '</pre>';
+    		//echo '</pre>';
+            //die();
         }        
 	}
    

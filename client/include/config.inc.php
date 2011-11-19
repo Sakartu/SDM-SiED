@@ -5,16 +5,6 @@
     
     require_once(dirname(__FILE__).'/../lib/sdm_symmetric_crypt.php');
     
-    $text = "je_moeder";
-    $dhash = hash('sha512', $text, true);
-    echo 'count='.strlen($dhash)."<br/>";
-    echo $dhash."<br/>";
-    $dd = substr($dhash, 0, 16);
-    //$dd2 = substr($dhash, strlen($dhash)-16, 16);
-    echo base64_encode($dd)." OK ";
-    $crypt = new SdmSymmetricCrypt($dd);
-    echo '<h1>'.$crypt->encrypt($text).'</h1>';
-    
 ?>
 
 <h1>Server Information</h1>

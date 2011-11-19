@@ -98,10 +98,17 @@ class NodeRow
         $result[] = $this->post;
         $result[] = $this->parent;
         
+        //echo "\n-------------------------------------------------------------";        
+        //echo "\nNodeRow::toEncryptedArray START == (".$result[0].", ".$result[1].", ".$result[2].", ".$result[3].", ".$this->tag." , ".$this->val.")\n";
+        
+        //echo "----ENCRYPT TAG----\n";
         $result[] = SdmSymmetricCrypt::encryptForSearching($this->encryption_key, $this->hash_key, $this->tag, $this->pre);
+        
+        //echo "\n----ENCRYPT VALUE----\n";
         $result[] = SdmSymmetricCrypt::encryptForSearching($this->encryption_key, $this->hash_key, $this->val, $this->pre);
         
-        echo "\nRow::(".$result[0].", ".$result[1].", ".$result[2].", ".$result[3].", ".$result[4].", ".$result[5].",)";
+        //echo "\nNodeRow::toEncryptedArray() END == (".$result[0].", ".$result[1].", ".$result[2].", ".$result[3].", ".$result[4].", ".$result[5].",)\n";
+        //echo "-------------------------------------------------------------\n\n";
         
         return $result;
     }

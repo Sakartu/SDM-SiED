@@ -140,11 +140,13 @@ class SdmSymmetricCrypt
     {
         $debug = false;
         $dmsg = '<pre>';
-        $dmsg .= "CALL: encryptForSearching(".$encryption_key.', '.$hash_key.', '.$plainText.', '.$preValue.")\n";
+        $dmsg .= "SdmSymmetricCrypt::encryptForSearching(".base64_encode($encryption_key)."\n, ".base64_encode($hash_key)."\n, ".$plainText."\n, ".$preValue.")\n\n";
         
         // First encrypt plaintext to Xi
         $crypt = new SdmSymmetricCrypt($encryption_key);
         $enc_plaintext = $crypt->encrypt($plainText, false);
+        
+        $dmsg .= "enc_plaintext = ".base64_encode($enc_plaintext).' (rawlength='.strlen($enc_plaintext).")\n";
         
         // We use AES (block size 128, key size 128),so strlen($enc_plaintext) is a multiple of 16 bytes.
          
@@ -155,7 +157,7 @@ class SdmSymmetricCrypt
         $l_enc = substr($enc_plaintext, 0, (strlen($enc_plaintext)/2));
         $r_enc = substr($enc_plaintext, (strlen($enc_plaintext)/2));
         
-        $dmsg .= htmlentities('Encrypted plaintext: '.strToHex($enc_plaintext).' split into "'.strToHex($l_enc).'" and "'.strToHex($r_enc).'"'."\n"."   length N = ".strlen($enc_plaintext));
+        //$dmsg .= htmlentities('Encrypted plaintext: '.base64_encode($enc_plaintext).' split into "'.base64_encode($l_enc).'" and "'.base64_encode($r_enc).'"'."\n"."   length N = ".strlen($enc_plaintext));
 
         // Generate this element's unique hash-key based on the left part of the encrypted plaintext
         // ki = f(Li)   where f is a hash function keyed with $hash_key
@@ -165,7 +167,7 @@ class SdmSymmetricCrypt
         
         $element_hashkey = substr($element_hashkey, strlen($element_hashkey)-16);
         
-        $dmsg .= "\nelement_hashkey width: ".strlen($element_hashkey)." -> ".$element_hashkey."!!!!\n\n";
+        $dmsg .= "element_hashkey: ".base64_encode($element_hashkey).' (rawlength='.strlen($element_hashkey).")\n";
         /* 
          * Then generate Si based on the pre value, and calculate F(Si) where F is a hash function keyed with ki
          * 
@@ -185,9 +187,9 @@ class SdmSymmetricCrypt
         
         $charcodesum = strSumCharcodes($seedString);
 
-        $dmsg .= 'hash input: '.$encryption_key.'  and  '.$preValue."\n";
-        $dmsg .= 'hash output: '.$seedString."\n";
-        $dmsg .= 'hash output SUMS TO '.$charcodesum."\n";
+        //$dmsg .= 'hash input: '.$encryption_key.'  and  '.$preValue."\n";
+        //$dmsg .= 'hash output: '.$seedString."\n";
+        //$dmsg .= 'hash output SUMS TO '.$charcodesum."\n";
         
         mt_srand($charcodesum);
         
@@ -200,8 +202,7 @@ class SdmSymmetricCrypt
             
         }
         
-        $dmsg .= $random_l.'   strlen:'.strlen($random_l)."\n";
-        $dmsg .= strToHex($random_l)."\n";
+        $dmsg .= 'random_left_part = '.base64_encode($random_l).'   (rawlength='.strlen($random_l).")\n";
 
         // Now hash the left pseudorandom part to get the right part. 
         // The F-hash is actually AES128 encryption with key: $element_haskey
@@ -209,16 +210,17 @@ class SdmSymmetricCrypt
         // (the last n/2 bytes of the encrypted value are used) 
         $crypt = new SdmSymmetricCrypt($element_hashkey);
         $random_r = $crypt->encrypt($random_l, false);
+        $dmsg .= "ki = ".base64_encode($element_hashkey).",   sp1 = ".base64_encode($random_l).",   e(ki, sp1) = ".base64_encode($random_r)."\n";
 
-        $dmsg .= 'random_r: '.$random_r."\n";
-        $dmsg .= 'random_r_strlen: '.strlen($random_r)."\n";
+        $dmsg .= 'full_right_part: '.base64_encode($random_r)."   (rawlength=".strlen($random_r).")\n";
         
         $random_r = substr($random_r, strlen($random_r)-strlen($random_l));
 
-        $dmsg .= 'random_r: '.$random_r."\n";
-        $dmsg .= 'random_r_strlen: '.strlen($random_r)."\n";
+        $dmsg .= 'right_part = (random_left_part encrypted with element_hashkey) =  '.base64_encode($random_r).'   (rawlength='.strlen($random_r).")\n";
         
         $searchtext = $random_l.$random_r;
+        
+        $dmsg .= 'searchtext = concat(random_left_part, right_part) = '.base64_encode($searchtext).'   (rawlength='.strlen($searchtext).")\n";
         
         // Finally XOR the encrypted plaintext and the search-text
         // $encrypted_plaintext XOR ($random_l.$random_r)
@@ -227,8 +229,8 @@ class SdmSymmetricCrypt
         
         
         $result = $enc_plaintext ^ $searchtext;
-        $dmsg .= '$enc_plaintext ^ $searchtext == $result'."\n";
-        $dmsg .= $enc_plaintext.' ^ '.$searchtext.' == '.$result."\n";
+        $dmsg .= 'enc_plaintext ^ searchtext == ciphertext'."\n";
+        $dmsg .= base64_encode($enc_plaintext)."\n^\n".base64_encode($searchtext)."\n == \n".base64_encode($result)."\n\n\n";
         
         $result = base64_encode($result);
         
@@ -257,6 +259,7 @@ class SdmSymmetricCrypt
         {
             die('The key or IV size was not correct: "'.$key128. '" "'.$iv128.'"');
         }
+        //echo "\nSDMSymmetricCrypt CONSTRUCT with key == ".base64_encode($key128)."\n";
 
         $this->key128 = $key128;
         $this->iv128 = $iv128;
@@ -275,10 +278,15 @@ class SdmSymmetricCrypt
                 $plain = "\0";
             }
             // PHP pads with NULL bytes if $cleartext is not a multiple of the block size..
+            
+            // but we want to do EXPLICIT PKCS5 PADDING to block size of 16 bytes
+            $plain = pkcs5_pad($plain, 16);             
+            
             $cipherText = mcrypt_generic($this->cipher,$plain);
+            //echo "mcrypt_generic(".base64_encode($this->key128).", ".$plain.") b64plain == ".base64_encode($plain)."\n";
 
-            // Display the result in hex.
-            //echo (sprintf("128-bit encrypted result:\n%s\n\n",bin2hex($cipherText)));
+            // Display the result in b64.
+            //echo (sprintf("128-bit encrypted result: %s\n",base64_encode($cipherText)));
 
             if ($base64)
             {
@@ -304,6 +312,9 @@ class SdmSymmetricCrypt
             $cipherText = base64_decode($b64_cipherText);
             $plainText = mdecrypt_generic($this->cipher, $cipherText);
 
+            //unpad PKCS5
+            $plainText = pkcs5_unpad($plain);
+            
             //echo (sprintf("128-bit decrypted result: \n%s\n\n",$plainText));
 
             $result = trim($plainText);
