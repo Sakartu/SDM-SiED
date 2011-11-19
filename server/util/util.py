@@ -1,7 +1,7 @@
-from M2Crypto import EVP, RSA, BIO
+from M2Crypto import EVP, RSA, BIO, util
 import constants
 import os
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from binascii import hexlify
 
 # AES Encryption stuff
@@ -13,7 +13,8 @@ def decrypt(key, data):
     cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=False, op=0)
     dec = cipher.update(data)
     dec += cipher.final()
-    return dec.rstrip('\0')
+    #return dec.rstrip('\0')
+    return depad_pkcs5(dec)
 
 def encrypt(key, data):
     ''' 
@@ -22,7 +23,8 @@ def encrypt(key, data):
     the right amount of bits and uses 16 NULL bytes for the IV.
     '''
     cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=False, op=1)
-    enc = cipher.update(padr(data, 128/8))
+    padded = pad_pkcs5(data, 16)
+    enc = cipher.update(padded)
     enc += cipher.final()
     return enc
 
@@ -33,6 +35,19 @@ def paddedlength(data,n):
 
 def padr(data,n,c='\0'):
     return data.ljust(paddedlength(data,n),c)
+
+def depad_pkcs5(data):
+    numpad = ord(data[-1])
+    return data[:-numpad]
+
+def pad_pkcs5(data, blklen=8):
+    numpad = blklen - (len(data) % blklen)
+    if numpad:
+        return data + str(chr(numpad)*numpad)
+    else:
+        return data + str(chr(blklen)*blklen)
+
+
 
 # RSA signature stuff
 def sign(keystring, is_file=False, *data):
