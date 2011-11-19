@@ -1,10 +1,8 @@
 from constants import DB
-from db import db
-def get_parents(conf, roots):
-    result = []
-    for root in roots:
-        result.append(db.fetch_parent(conf, root))
-    return result
+def get_parent(records, root):
+    for record in records:
+        if record[DB.TREE_PRE] == root[DB.TREE_PARENT]:
+            return record
 
 def get_descendants(records, root):
     results = []
@@ -19,6 +17,12 @@ def get_children(records, root):
         if record[DB.TREE_PARENT] == root[DB.TREE_PRE]:
             results.append(record)
     return results
+
+def get_all_parents(records, roots):
+    result = []
+    for root in roots:
+        result.append(get_parent(records, root))
+    return result
 
 def get_all_children(records, roots):
     result = []
