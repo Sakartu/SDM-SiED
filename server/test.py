@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from hashlib import sha512
 from util import util
 from binascii import hexlify
