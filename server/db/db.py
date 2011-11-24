@@ -12,11 +12,11 @@ def initialize(conf):
     db_path = util.preparse_path(conf['db_location'])
 
     #remove db if we're debugging
-    if 'debug' in conf and conf['debug']:
-        try:
-            os.remove(db_path)
-        except:
-            pass
+    #if 'debug' in conf and conf['debug']:
+    #    try:
+    #        os.remove(db_path)
+    #    except:
+    #        pass
 
     if not os.path.exists(os.path.dirname(db_path)):
         os.makedirs(os.path.dirname(db_path))
