@@ -64,16 +64,18 @@ if (!isset($_SESSION['client_id'])) {
 <div>
 	<form method="post">
 	    <script language="javascript">a='<\?xml version="1.0" encoding="UTF-8"\?>\n'+
-                                        '<bookstore>\n'+
-                                        '<book>\n'+
-                                          '<title lang="eng">Harry Potter</title>\n'+
-                                          '<price>29.99</price>\n'+
-                                        '</book>\n'+
-                                        '<book>\n'+
-                                          '<title lang="eng">Learning XML</title>\n'+
-                                          '<price>39.95</price>\n'+
-                                        '</book>\n'+
-                                        '</bookstore>'; 
+                                        '<moneylaundering>\n'+
+                                        '<offshore>\n'+
+                                          '<name country="caymans">Pyramid Investment Holding B.V.</name>\n'+
+                                          '<account>345122359</account>\n'+
+                                          '<amount>5,000,000</amount>\n'+
+                                        '</offshore>\n'+
+                                        '<offshore>\n'+
+                                          '<name lang="switzerland">Global Enrichment Group</name>\n'+
+                                          '<account>3133757</account>\n'+
+                                          '<amount>25,000</amount>\n'+
+                                        '</offshore>\n'+
+                                        '</moneylaundering>'; 
         </script>
 	    <span class="minimizedText" onClick="$('#xmlinput').val(a)">test-document #1</span>
         <script language="javascript">              b=  '<\?xml version="1.0" encoding="ISO-8859-1"\?>\n' +
