@@ -13,12 +13,13 @@ if(isset($_GET['action']) && isset($_SESSION['result']))
         $type = trim($_GET['type']);
         $pre = trim($_GET['pre']);
         $txt = trim($_GET['txt']); // new value
+        $gcid = $_GET['cid'];
         
-        if (isset($type) && isset($pre) && isset($txt) && !empty($txt) && !empty($type))
+        if (isset($type) && isset($pre) && isset($txt) && !empty($txt) && !empty($type) && isset($gcid))
         {
             if ($pre >= 0)
             {
-                $cid = $result['clientId'];
+                $cid = (int)$gcid; //$result['clientId'];
 
                 // Check if the clientId still exists, because we will need its keys
                 $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE id = :client_id");
@@ -49,16 +50,16 @@ if(isset($_GET['action']) && isset($_SESSION['result']))
                                base64_decode($client_info['hash_key']), $txt, $pre);
                     }
                     
-                    echo '<pre>Updating '.$pre.' to '."\n".$enctag." \n=>\n".$encval."\n".'cid='.$cid.' and '."\n".'treeId='.$result['treeId'];
+                    echo '<pre>Updating '.$pre.' to '."\n".$enctag." \n=>\n".$encval."\n".'cid='.$cid.' and '."\n".'treeId='.$result[$cid]['treeId'];
                     
                     //updateRow(client_id, $treeId, $pre, $tag, $value)
-                    XmlRpcStubs::updateRow($cid, $result['treeId'], $pre, $enctag, $encval);
+                    XmlRpcStubs::updateRow($cid, $result[$cid]['treeId'], $pre, $enctag, $encval);
                     
                     // If the update succeeded then we must update the rows for this PRE in the cached result values.
                     // The alternative would be to re-execute the query, but that is an expensive operation.
 
                     $newArrays = array();
-                    foreach ($result['rowArrays'] as $rowArrayIndex => $rowArray)
+                    foreach ($result[$cid]['rowArrays'] as $rowArrayIndex => $rowArray)
                     {
                         $newRowArray = array();
                         
@@ -89,7 +90,7 @@ if(isset($_GET['action']) && isset($_SESSION['result']))
                         
                         $newArrays[] = $newRowArray;
                     }
-                    $_SESSION['result']['rowArrays'] = $newArrays;
+                    $_SESSION['result'][$cid]['rowArrays'] = $newArrays;
                 }
                 
             }
