@@ -99,147 +99,192 @@ else if (isset($_POST['query']))
         else 
         {
             $query = $_POST['query'];
+            $cids = array();
+            $resultArrays = array();
             
-            // Then retrieve the encryption keys for the client:
-            $cid = $_SESSION['client_id'];
-            $treeId = SdmSymmetricCrypt::simpleClientEncrypt($cid, $cid);
-            
-            $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE id = :client_id");
-            $qry->execute(array(':client_id' => $cid));
-    
-            $client_info = $qry->fetch(PDO::FETCH_ASSOC);
-            $raw_encryption_key = base64_decode($client_info['encryption_key']);
-            $raw_hash_key = base64_decode($client_info['hash_key']);
-    
-    		// Encrypt the XPath query using the method described in 
-    		// "Efficient Tree Search in Encrypted Data"
-    		// R. Brinkman, L. Feng, J. Doumen, P.H. Hartel and W. Jonker
-    		
-    		// We first need to convert:    /a//b/c[d="e"]
-    		// to: /0//1/2[3=4]    
-    		// where the numbers are indices in the terms array:
-    		// $terms[0][0] == E('a')
-    		// $terms[0][1] == the elemen-specific-hashkey (ki) for this ciphertext
-    		
-    		
-    		// 1) Split up the Xpath query into the terms between the foreslashes
-    		$term_array = explode('/', $query);
-            
-            // The first term is always empty, because all queries start with '/', so remove the first term:
-            unset($term_array[0]);
-
-            //echo '<pre>';
-            //echo 'QUERY: '.$query."\n";
-            //print_r($term_array);
-            
-            // 2) Make one pass over the split terms, generating the query string and the terms array.
-            $newQuery = '';
-            $newTerms = array();
-            foreach ($term_array as $term)
+            // which users should we query for?
+            if (isset($_POST['allquery']))
             {
-                if (empty($term))
+                // This query should be executed for each identity
+                $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients");
+                $qry->execute();
+                
+                while ($result = $qry->fetch(PDO::FETCH_ASSOC)) 
                 {
-                    // Empty term, inbetween double foreslashes '//'
-                    $newQuery .= '/';
+                    $cids[] = $result['id'];
                 }
-                else 
+            }
+            else
+            {
+                // This query should be executed only for the current identity
+                $cids[] = $_SESSION['client_id'];
+            }
+
+            
+            foreach($cids as $cid)
+            {
+                echo "!!!CHECKING CLIENT ".$cid."!!!";
+                // Then retrieve the encryption keys for the client:
+                $treeId = SdmSymmetricCrypt::simpleClientEncrypt($cid, $cid);
+                
+                $qry = SqliteDb::getDb()->prepare("SELECT * FROM clients WHERE id = :client_id");
+                $qry->execute(array(':client_id' => $cid));
+        
+                $client_info = $qry->fetch(PDO::FETCH_ASSOC);
+                $raw_encryption_key = base64_decode($client_info['encryption_key']);
+                $raw_hash_key = base64_decode($client_info['hash_key']);
+        
+        		// Encrypt the XPath query using the method described in 
+        		// "Efficient Tree Search in Encrypted Data"
+        		// R. Brinkman, L. Feng, J. Doumen, P.H. Hartel and W. Jonker
+        		
+        		// We first need to convert:    /a//b/c[d="e"]
+        		// to: /0//1/2[3=4]    
+        		// where the numbers are indices in the terms array:
+        		// $terms[0][0] == E('a')
+        		// $terms[0][1] == the elemen-specific-hashkey (ki) for this ciphertext
+        		
+        		
+        		// 1) Split up the Xpath query into the terms between the foreslashes
+        		$term_array = explode('/', $query);
+                
+                // The first term is always empty, because all queries start with '/', so remove the first term:
+                unset($term_array[0]);
+    
+                //echo '<pre>';
+                //echo 'QUERY: '.$query."\n";
+                //print_r($term_array);
+                
+                // 2) Make one pass over the split terms, generating the query string and the terms array.
+                $newQuery = '';
+                $newTerms = array();
+                foreach ($term_array as $term)
                 {
-                    // Non-empty term, check if it includes a predicate
-                    $newQuery .= '/';
-                    
-                    if (strpos($term, '[') === false)
+                    if (empty($term))
                     {
-                        // String does not contains a predicate, so it simply looks like: 'a'
-                        $searchTerm = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $term);
-                        $newTerms[] = $searchTerm;
-                        $newQuery .= count($newTerms)-1;
+                        // Empty term, inbetween double foreslashes '//'
+                        $newQuery .= '/';
                     }
                     else 
                     {
-                        // String contains a predicate, term looks like: 'a[b="c"]'
-                        // Extract all three terms:
-                        $predStart = strpos($term, '[');
-                        $firstTerm = substr($term, 0, $predStart);
-
-                        $searchFirstTerm = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $firstTerm);
-                        $newTerms[] = $searchFirstTerm;
-                        $newQuery .= count($newTerms)-1;
-
-                        $newQuery .= '[';
-
-                        $predString = substr($term, $predStart);
-                        $predSep = strpos($predString, '=');
-                        $predTag = substr($predString, 1, $predSep-1);
-                        $predVal = substr($predString, $predSep+1, strlen($predString)-($predSep+2));
-                        $predVal = str_replace('"', '', $predVal);
+                        // Non-empty term, check if it includes a predicate
+                        $newQuery .= '/';
                         
-                        $searchPredTag = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $predTag);
-                        $newTerms[] = $searchPredTag;
-                        $newQuery .= count($newTerms)-1;
-                        
-                        $newQuery .= '="';
-                        
-                        $searchPredVal = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $predVal);
-                        $newTerms[] = $searchPredVal;
-                        $newQuery .= count($newTerms)-1;
-                        
-                        $newQuery .= '"]';
+                        if (strpos($term, '[') === false)
+                        {
+                            // String does not contains a predicate, so it simply looks like: 'a'
+                            $searchTerm = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $term);
+                            $newTerms[] = $searchTerm;
+                            $newQuery .= count($newTerms)-1;
+                        }
+                        else 
+                        {
+                            // String contains a predicate, term looks like: 'a[b="c"]'
+                            // Extract all three terms:
+                            $predStart = strpos($term, '[');
+                            $firstTerm = substr($term, 0, $predStart);
+    
+                            $searchFirstTerm = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $firstTerm);
+                            $newTerms[] = $searchFirstTerm;
+                            $newQuery .= count($newTerms)-1;
+    
+                            $newQuery .= '[';
+    
+                            $predString = substr($term, $predStart);
+                            $predSep = strpos($predString, '=');
+                            $predTag = substr($predString, 1, $predSep-1);
+                            $predVal = substr($predString, $predSep+1, strlen($predString)-($predSep+2));
+                            $predVal = str_replace('"', '', $predVal);
+                            
+                            $searchPredTag = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $predTag);
+                            $newTerms[] = $searchPredTag;
+                            $newQuery .= count($newTerms)-1;
+                            
+                            $newQuery .= '="';
+                            
+                            $searchPredVal = SdmSymmetricCrypt::encryptXpathTerm($raw_encryption_key, $raw_hash_key, $predVal);
+                            $newTerms[] = $searchPredVal;
+                            $newQuery .= count($newTerms)-1;
+                            
+                            $newQuery .= '"]';
+                        }
                     }
-                }
-                
-            }
-            //echo $newQuery."\n";
-            //print_r($newTerms);
-    		
-    		
-    		// Let's send the query to the server!
-    		$response = XmlRpcStubs::sendQuery($cid, $treeId, $newQuery, $newTerms);
-            
-            //echo "\n\n--------DECODED RESPONSE-------\n";
-            //print_r($response);
-            if (is_array($response) && (count($response) > 0))
-            {
-                $nodeRowArrays = array();
-                foreach ($response as $resultInstance) {
-                    //$response contains an array of result trees
                     
-                    $nodeRows = array();
-                    foreach ($resultInstance as $row)
-                    {
-                        //$row contains the encoded rows:
-                        //[0] == treeId
-                        //[1] == pre
-                        //[2] == post
-                        //[3] == parent
-                        //[4] == tag
-                        //[5] == value
-                        
-                        //NodeRow constructor ($encryption_key, $hash_key, $treeId, $pre, $post, $parent, $tag, $val, $tagAndValEncrypted = false)
-                        $nodeRow = new NodeRow($raw_encryption_key, $raw_hash_key, $row[0], $row[1], $row[2], $row[3], $row[4], $row[5], true);
-                        $nodeRows[] = serialize($nodeRow);
-                    }
-                    $nodeRowArrays[] = $nodeRows;
                 }
+                //echo "<pre>";
+                //echo $newQuery."\n";
+                //print_r($newTerms);
+        		
+        		
+        		// Let's send the query to the server!
+        		$response = XmlRpcStubs::sendQuery($cid, $treeId, $newQuery, $newTerms);
                 
-                
-                $resultArray = array();
-                $resultArray['rowArrays'] = $nodeRowArrays;
-                $resultArray['clientId'] = $cid;
-                $resultArray['treeId'] = $treeId;
-                $resultArray['query'] = $query;
-                $resultArray['newQuery'] = $newQuery;
-                $resultArray['newTerms'] = $newTerms;
-                
-                $_SESSION['result'] = $resultArray;
-                
-                header("Location:index.php?page=result");
-                exit;
+                //echo "\n\n--------DECODED RESPONSE-------\n";
+                //print_r($response);
+                //echo "</pre>";
+                if (is_array($response) && (count($response) > 0))
+                {
+                    $nodeRowArrays = array();
+                    foreach ($response as $resultInstance) 
+                    {
+                        //$response contains an array of result trees
+                        
+                        $nodeRows = array();
+                        foreach ($resultInstance as $row)
+                        {
+                            //$row contains the encoded rows:
+                            //[0] == treeId
+                            //[1] == pre
+                            //[2] == post
+                            //[3] == parent
+                            //[4] == tag
+                            //[5] == value
+                            
+                            //NodeRow constructor ($encryption_key, $hash_key, $treeId, $pre, $post, $parent, $tag, $val, $tagAndValEncrypted = false)
+                            $nodeRow = new NodeRow($raw_encryption_key, $raw_hash_key, $row[0], $row[1], $row[2], $row[3], $row[4], $row[5], true);
+                            $nodeRows[] = serialize($nodeRow);
+                        }
+                        $nodeRowArrays[] = $nodeRows;
+                    }
+                    
+                    
+                    $resultArray = array();
+                    $resultArray['rowArrays'] = $nodeRowArrays;
+                    $resultArray['clientId'] = $cid;
+                    $resultArray['treeId'] = $treeId;
+                    $resultArray['query'] = $query;
+                    $resultArray['newQuery'] = $newQuery;
+                    $resultArray['newTerms'] = $newTerms;
+                    
+                    // Add to final result set
+                    $resultArrays[$cid] = $resultArray;
+                    
+                } // if is_array(response)
+                else
+                {
+                    $resultArray = array();
+                    $resultArray['rowArrays'] = array();
+                    $resultArray['clientId'] = $cid;
+                    $resultArray['treeId'] = $treeId;
+                    $resultArray['query'] = $query;
+                    $resultArray['newQuery'] = $newQuery;
+                    $resultArray['newTerms'] = $newTerms;
+                    
+                    // Add to final result set
+                    $resultArrays[$cid] = $resultArray;
+                }
 
-                
+            } // foreach $cids
+            
+            $_SESSION['result'] = $resultArrays;
 
-            }
-            // If we reach this point we did not get a proper response.
-            addNotification("Error: No rows returned, insert a tree first!");
+            //echo "<pre>Results for clients\n";
+            //print_r($resultArrays);
+            //echo "</pre>";
+            //die();
+            
+            header("Location:index.php?page=result");
+            exit;
             
         }
     }
