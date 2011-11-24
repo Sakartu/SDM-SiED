@@ -71,7 +71,7 @@ if (!isset($_SESSION['client_id'])) {
                                           '<amount>5,000,000</amount>\n'+
                                         '</offshore>\n'+
                                         '<offshore>\n'+
-                                          '<name lang="switzerland">Global Enrichment Group</name>\n'+
+                                          '<name country="switzerland">Global Enrichment Group</name>\n'+
                                           '<account>3133757</account>\n'+
                                           '<amount>25,000</amount>\n'+
                                         '</offshore>\n'+
