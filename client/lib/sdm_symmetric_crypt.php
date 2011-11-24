@@ -272,7 +272,9 @@ class SdmSymmetricCrypt
         // do 128-bit AES encryption:
         if (mcrypt_generic_init($this->cipher, $this->key128, $this->iv128) != -1)
         {
-            $plain = trim($plainText);
+            //echo "\nPADDING ".base64_encode($plainText)." to 16, plainlen=".strlen($plainText);
+            
+            $plain = $plainText;
             if (empty($plain))
             {
                 $plain = "\0";
@@ -280,7 +282,10 @@ class SdmSymmetricCrypt
             // PHP pads with NULL bytes if $cleartext is not a multiple of the block size..
             
             // but we want to do EXPLICIT PKCS5 PADDING to block size of 16 bytes
-            $plain = pkcs5_pad($plain, 16);             
+            //echo "\nPADDING ".base64_encode($plain)." to 16, plainlen=".strlen($plain);
+            
+            $plain = pkcs5_pad($plain, 16);   
+            //echo "\nDONE: ".base64_encode($plain)."\n";          
             
             $cipherText = mcrypt_generic($this->cipher,$plain);
             //echo "mcrypt_generic(".base64_encode($this->key128).", ".$plain.") b64plain == ".base64_encode($plain)."\n";

@@ -78,6 +78,10 @@ class SiEDRPCHandler(object):
         if not query:
             return []
 
+        logger.info('Handling query "{0}".'.format(query))
+        logger.info('Using mapping:')
+        for (k, v) in dict(enumerate(encrypted_content)).items():
+            logger.info('\t\t{k} : {v}'.format(k=str(k), v=str(v)))
         (tokens, sep, right) = query.partition('[')
         tokens = tokens.split('/')
         if sep and right:
@@ -112,7 +116,7 @@ class SiEDRPCHandler(object):
                 descendants = xpath.get_all_descendants(all_records, records)
                 records = util.matching(descendants, xi, ki, constants.DB.TREE_CTAG)
                 logger.info('Found {0} matching descendants, continuing!'.format(len(records)))
-                logger.debug('got //, records are: ' + str(records))
+                logger.debug('Got token //, records are: ' + str(records))
                 i += 1
             elif not '[' in token:
                 logger.info('Fetching children and looking for match...')
@@ -125,7 +129,7 @@ class SiEDRPCHandler(object):
                 children = xpath.get_all_children(all_records, records)
                 records = util.matching(children, xi, ki, constants.DB.TREE_CTAG)
                 logger.info('Found {0} matching children, continuing!'.format(len(records)))
-                logger.debug('got normal node, records are: ' + str(records))
+                logger.debug('Got normal node (/), records are: ' + str(records))
                 i += 1
             else:
                 logger.info('Fetching attribute names and looking for match...')
@@ -148,11 +152,11 @@ class SiEDRPCHandler(object):
                 # corresponding nodes
                 records = xpath.get_all_parents(all_records, records)
                 records = xpath.get_all_parents(all_records, records)
-                logger.debug('done parsing, results are: ' + str(records))
+                logger.debug('Done parsing, results are: ' + str(records))
                 i += 1
         # we have a list of matching roots, now retrieve entire subtree for each root
         if records:
-            result = [db.fetch_subtree(self.conf, x) for x in records]
+            result = [db.fetch_subtree(self.conf, x, tree_id) for x in records]
             # sort records list based on pre values.
             return [sorted(x, key=lambda x : x[1]) for x in result]
         else:
