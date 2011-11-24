@@ -24,9 +24,6 @@ def encrypt(key, data):
     '''
     cipher = EVP.Cipher(alg='aes_128_cbc', key=key, iv='\0' * 16, padding=False, op=1)
     padded = pad_pkcs5(data, 16)
-    print 'padded (repr):', repr(padded)
-    print 'padded (hex):', hexlify(padded)
-    print 'padded (b64):', b64encode(padded)
     enc = cipher.update(padded)
     enc += cipher.final()
     return enc
