@@ -156,7 +156,7 @@ class SiEDRPCHandler(object):
                 i += 1
         # we have a list of matching roots, now retrieve entire subtree for each root
         if records:
-            result = [db.fetch_subtree(self.conf, x) for x in records]
+            result = [db.fetch_subtree(self.conf, x, tree_id) for x in records]
             # sort records list based on pre values.
             return [sorted(x, key=lambda x : x[1]) for x in result]
         else:
