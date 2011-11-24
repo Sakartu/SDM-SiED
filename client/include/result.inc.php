@@ -69,16 +69,16 @@
     else 
     {
         $results = $_SESSION['result'];
+
+        //echo "<pre>";
+        //print_r($results);
+        //echo "</pre>";
+
         
         $first = true;
         foreach ($results as $cid => $result)
         {
             $client_info = $client_infos[$cid];
-            
-            //echo "<pre>";
-            //print_r($result);
-            //echo "</pre>";
-            
             
             echo '<span class="queryDescr">User: </span><span class="queryStr">'.$client_info['username'].'</span><br/>'."\n";
             echo '<span class="queryDescr">Result count: </span><span class="queryStr">'.count($result['rowArrays']).'</span><br/>'."\n";
@@ -122,7 +122,7 @@
                         $class = (($cnt % 2) == 1) ? 'class="light"' : 'class="dark"';
                         $cnt++;
                         echo '<tr '.$class.'><td>'.$node->pre.'</td><td>'.$node->post.'</td><td>'.$node->parent.'</td>'."\n";
-                        echo '<td>'.togSpan($node->tag, $node->enctag).'</td><td>'.togSpan($node->val, $node->encval).'</td></tr>'."\n";
+                        echo '<td>'.togSpan(htmlentities($node->tag), htmlentities(base64_decode($node->enctag))).'</td><td>'.togSpan(htmlentities($node->val), htmlentities(base64_decode($node->encval))).'</td></tr>'."\n";
                     }
                 }
                 else
