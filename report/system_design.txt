@@ -1,0 +1,62 @@
+From quick glance at the requirements we can see that there are two separations required within our solution:
+
+1. There has to be a separation between encrypted and plain text domains
+2. There has to be a separation between two encrypted domains of different clients
+
+As a solution to the first problem we defined two services; one which operations in the encrypted domain and one which operates in the plaintext domain. Both services are formed by different applications, there is a storage server which handles only encrypted data and encrypted queries and a client application which works with the plaintext data. The storage server is an XMLRPC service which exposes the required functionality using XMLRPC functions that can be called by the client.
+
+The second problem is the separation between data belonging to two different clients. We solved this problem using a public-key scheme in which the public key for a client is used to determine which data it can access and on what data it can perform queries. The consultant has the keys for all his/her clients, meaning that he/she has full access to all the data available. The consultant also manages all the key setup and distribution. The storage server requires the public key of a client to verify the permissions for the client, meaning that the consultant has to make sure that keys for a new client are inserted in the storage server. As these keys are only the public parts they can be stored in the clear, no encryption is required. Such a public key scheme isn't required for querying (see chapter TODO: BACKREF TO ALGORITHM CHAPTER) but is required to support insertion and update to only a client's own data. The exact way in which the keys are used is described, along with an overview of the interaction between both services, in the following sections.
+
+Service interactions
+====================
+
+The server part of the system functions purely as a data storage and query engine. It stores the public keys for all the clients, stores all the encrypted data and handles insertions/updates and queries. The client is the party that handles the keys, encrypts the data and performs the queries. We will first discuss the signing procedure and then elaborate on the insertion/update and query procedures.
+
+Key management and signing
+--------------------------
+
+TODO SIGNING
+
+To make sure that client can only access his/her own data we use a signing scheme using the client's aforementioned public/private keys. Every function that a client calls at the server has to be signed using the client's private key. In practise this means that the client signs the function name that it wants to call. This signature, along with a client id and the other parameters required for the call, is given to the server which uses the client id to find the client's public key and then uses that public key to check the signature. Every client id also corresponds to a tree id, which in turn corresponds to a dataset for this client. The server will then only insert/update/query this dataset, meaning that access permissions are enforced.
+
+Insertions/updates
+------------------
+
+Let us take insertion as an example. If a client wants to insert a tree into the database it first turns the tree into a list of encrypted rows as mentioned in the data model chapter. These rows contain the following information:
+
+1. tree_id
+2. pre/post/parent values
+3. encrypted tag/encrypted value pairs
+
+Then it signs the name of the function that it wants to call ('insert') using it's private key and calls the function with parameters (signature, client_id, list_of_encrypted_rows).
+
+Updating a tree goes in exactly the same manner but only takes one row instead of a list of rows. The server then finds the row to update using the given pre value and changes the values to the given new values.
+
+Queries
+-------
+
+Since the data is assumed to be XML structured data, queries are done in the form of XPath queries. If a client gets a query of the form //foo/bar[mytag="myvalue"] it first has to restructure and encrypt the query in such a way that the storage server can process it, but will learn nothing about the actual queried nodes; not even their names. Encryption of the query is explained in the chapter on algorithms (TODO: ALGORITHMS CHAPTER BACKREF). The client then calls the query function at the storage server, using the signature, client_id, tree_id and encrypted query as parameters. 
+
+Supported queries are the following:
+
+Name                               || Example                 || Explanation
+-----------------------------------||-------------------------||-----------------------------------------------------------------------------------------------------------------
+Search for named children          || /foo                    || Search for all nodes named foo that are child of the current node(s)
+Search for named descendants       || //foo                   || Search for all nodes named foo that are descendants of the current node(s)
+Search for attribute/value pairs   || /foo[@mytag="myvalue"]  || Search for all nodes named foo that are child of the current node(s) and have attribute foobar with value myvalue
+
+All the above methods can be combined to form more elaborate queries. 
+
+At the server side, the query is evaluated using the method described in [2] (paper met pre/post/parent value thingies). Once a list of candidate nodes is formulated using the pre, post and parent values the encrypted nodes are matched to the encrypted query content using the algorithm described in the chapter on algorithms (TODO: ALGORITHMS CHAPTER BACKREF). The result for a query is a list of matching nodes. According to the XPath specification, the result of an XPath query should be the matching nodes with for each of the nodes the subtree for which this node is the root, therefore the final result of the query will be a list of subtrees where the root of each subtree is a node that matched the query. Returning subtrees also has the advantage that the client can immediately see the context in which a node resides and may easily refine the query to search for more specific sets of information.
+
+Let us take a look at an example query performed on an example tree. 
+
+(TODO: INSERT EXAMPLE TREE PICTAR, _WITH_ LINE NUMBERS)
+
+On this tree we want to perform the query:
+
+//foo/bar[@mytag="myvalue"]
+
+We begin the algorithm with as a current node a rootnode that is the (virtual) parent of <foo>. We take the first part of the query ("//foo") and parse this query. The "//" tells us that we need all descendants of the current node, meaning that we fetch the entire tree, because all nodes are a descendant of our (virtual) rootnode. We then filter out all the nodes that don't match by looking for the node name "foo". This leaves us with two nodes namely the nodes on line 1 and line 13. The next part of the query ("/bar") tells us to get all the children of our current nodes and filter out all nodes that aren't called bar. Since we have only one current node with a child called "bar" the node from line 13 is left out and our new list of current nodes consists of the "bar" nodes on lines 2 and 8. Since attributes are converted to tag nodes and text nodes we can search for attributes in the same manner as we search for named children. 
+
+The actual algorithms used for getting the children and descendants are described in [2]. Also, in our implementation we don't use basic node name matching since everything needs to be done under encryption; see the algorithms chapter for more details on node matching.

@@ -1,0 +1,18 @@
+Requirements
+============
+
+From the usecases and the assignment we distilled the following requirements. The first four requirements are focussed on the consultant, the last four are focussed on the clients.
+
+1. The system should allow the consultant to insert a new client
+2. The system should allow the consultant to insert or update the financial data for a specific client
+3. The system should allow the consultant to query the data of all his/her clients
+4. The system should allow the consultant to query the data of a specific client
+5. The system should allow a client to insert or update his/her own financial data
+6. The system should allow a client to query his/her own financial data
+7. The system should not allow a client to insert or update another client's financial data
+8. The system should not allow a client to query another client's financial data
+9. All textual data should be stored in an encrypted manner
+10. The storage server should not be able to derive information about the content or the result of a query
+11. The storage server may derive the structure of the stored data
+
+The last requirement is included to make specific that we're only interested in the textual content of the stored data and the queries, it is not a problem if the server derives the structure of the data.

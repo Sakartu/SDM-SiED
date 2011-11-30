@@ -1,0 +1,18 @@
+<foo>
+    <bar>
+        <@mytag>
+            <#TEXT>myvalue</#TEXT>
+        </@mytag>
+        <#TEXT>Lorem ipsum</#TEXT>
+    </bar>
+    <bar>
+        <@mytag>
+            <#TEXT>mydifferentvalue</#TEXT>
+        </@mytag>
+        <#TEXT>dolor sit</#TEXT>
+        <foo>
+            <#TEXT>amet</#TEXT>
+        </foo>
+    </bar>
+</foo>
+
