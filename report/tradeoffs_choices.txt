@@ -12,6 +12,7 @@ Another downside of our approach is that it is (currently) not possible to searc
 
 Even though we implemented only a basic subset of the XPath query language our system can easily be extended to support a richer subset since all the filtering algorithms stay the same; all that is required is to extend the actual XPath query parsing.
 
+A final remark about the search scheme that we use is that, in very rare cases, it could happen that the algorithm says that a row matches a query, even though it does not. Our proof of concept implementation does not check whether the final results of a query actually match the xpath query, because the chances of a collision are very low. In a production environment, however, this check should be implemented.
 
 Scalability
 -----------
