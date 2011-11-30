@@ -1,13 +1,7 @@
 Use Cases
 =========
 
-In our solution there are two subjects, the consultant and the client. We assume
-that there is only one consultant (who has administration rights in the
-system) and that there are multiple clients. The consultant handles the
-financial data for his/her clients and is also responsible for all key
-management. After a client made him/herself known to the consultant and the
-consultant handled the appropriate key setup the client can insert and query
-his/her own financial data. We support the following use-cases:
+In our solution there are two subjects, the consultant and the client. We assume that there is only one consultant (who has administration rights in the system) and that there are multiple clients. The consultant handles the financial data for his/her clients and is also responsible for all key management. After a client made him/herself known to the consultant and the consultant handled the appropriate key setup the client can insert and query his/her own financial data. We support the following use-cases:
 
 Consultant
 ----------
