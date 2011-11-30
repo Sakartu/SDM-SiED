@@ -1,0 +1,27 @@
+Tradeoffs and Choices
+=====================
+
+Here we will discuss some of the tradeoffs and choices appropriate to our system.
+
+Search scheme
+-------------
+
+The implemented search scheme has some advantages and some disadvantages. The main advantage of the scheme is that it's quite easy to implement, it does not require any extra mathematics beside the symmetric crypto and signing used. The main disadvantage remains speed; implementing the required node matching algorithms directly in the database can be done but isn't trivial. This means that the node filtering is done after the rows have been fetched from the database, providing a significant overhead.
+
+Another downside of our approach is that it is (currently) not possible to search for wildcards or for words within text; we can only search for nodes and attributes. Our scheme can, however, be extended to support searching for words within the text by storing each word as a separate row in the database, but this means even more overhead.
+
+Even though we implemented only a basic subset of the XPath query language our system can easily be extended to support a richer subset since all the filtering algorithms stay the same; all that is required is to extend the actual XPath query parsing.
+
+
+Scalability
+-----------
+
+As already mentioned, te biggest problem with the solution is speed. The difference in speed is already noticable when comparing an XML document of 30 lines versus a document of 300 lines; the system will probably become unusable in a real-life situation. The reason for the non-scalability is the node filtering algorithm which has to do an AES encryption for every possible row, slowing down the query processing considerably. 
+
+Another problem arises when inserting nodes. Because the encryption of a row is (amongst other factors) based on the pre value, the resulting ciphertext changes when the pre value for a node changes. So, if a tree is updated such that the structure of the tree changes all rows with higher pre values in the document have to be reëncrypted and reinserted in the database. This problem can be partly mitigated by using larger intervals between pre values, but can not be solved completely.
+
+Security
+--------
+
+A final remark has to be made about the security of our implementation. Even though clients can only insert data in their own tree the system is not secure against replay attacks. Consider the example in which client A inserts a tree and directly afterwards inserts another tree. If client B can capture all the traffic between A and the server, he can replay the insertion procedure for the first tree and overwrite the change to the second tree. Mitigating this flaw can be done in a lot of different ways, one could for instance use nonces in every communication 
+between client and server (causing a bit more overhead) or one could wrap the entire communication in an SSL-enabled session and leave replayability mitigation to that session.
